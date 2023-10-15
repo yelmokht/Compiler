@@ -19,7 +19,11 @@ Second part - Options and declarations/macros
 
 //Code copied verbatim into the generated class
 %{
-    //TODO
+    private int firstOccurenceA;
+    private int firstOccurenceB;
+    private int firstOccurenceC;
+
+
 %}
 
 //Need to specify another end of file using %eofval because we used a user defined type (Symbol). The default value is null
@@ -28,6 +32,13 @@ Second part - Options and declarations/macros
 %eofval{
 	return new Symbol(LexicalUnit.EOS, yyline, yycolumn);
 %eofval}
+
+%eof{
+    System.out.println("\nVariables");
+    System.out.println("a " + firstOccurenceA);
+    System.out.println("b " + firstOccurenceB);
+    System.out.println("c " + firstOccurenceC);
+%eof}
 
 //Macros
 AlphaUpperCase = [A-Z]
@@ -61,17 +72,19 @@ that has the longest match.
 }
 
 <LONG_COMMENT_STATE> {
-
+    . {}
     "''" {yybegin(YYINITIAL);}
 }
 
 <SHORT_COMMENT_STATE> {
+    . {}
     {EndOfLine} {yybegin(YYINITIAL);}
 }
 
 {Alpha} {Symbol s = new Symbol(LexicalUnit.VARNAME, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
 {Numeric} {Symbol s = new Symbol(LexicalUnit.NUMBER, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
 {Space} {}
+{EndOfLine} {}
 "begin" {Symbol s = new Symbol(LexicalUnit.BEG, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
 "end" {Symbol s = new Symbol(LexicalUnit.END, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
 "..." {Symbol s = new Symbol(LexicalUnit.DOTS, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
