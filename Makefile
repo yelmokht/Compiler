@@ -1,6 +1,9 @@
 all:
 	jflex LexicalAnalyzer.flex
 	javac LexicalAnalyzer.java
+	java Main euclid.pmp
 
 test:
-	java LexicalAnalyzer ./test/test.txt
+	jflex LexicalAnalyzer.flex
+	javac LexicalAnalyzer.java
+	java Main ./test/test.txt
