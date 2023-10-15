@@ -24,6 +24,7 @@ Second part - Options and declarations/macros
     private int firstOccurenceC;
 
 
+
 %}
 
 //Need to specify another end of file using %eofval because we used a user defined type (Symbol). The default value is null
