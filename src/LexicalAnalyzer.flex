@@ -22,24 +22,24 @@ Second part - Options and declarations/macros
     private boolean firstOccurenceA = false;
     private boolean firstOccurenceB = false;
     private boolean firstOccurenceC = false;
-    private Symbol a;
-    private Symbol b;
-    private Symbol c;
+    private int aLine;
+    private int bLine;
+    private int cLine;
 
     private void alpha(Symbol s) {
         if(!firstOccurenceA && s.toString().equals("a")){
             firstOccurenceA = true;
-            a = s;
+            aLine = s.getLine();
         }
 
         if(!firstOccurenceB && s.toString().equals("b")){
             firstOccurenceB = true;
-            b = s;
+            bLine = s.getLine();
         }
 
         if(!firstOccurenceC && s.toString().equals("c")){
             firstOccurenceC = true;
-            c = s;
+            cLine = s.getLine();
         }
     }
 %}
@@ -53,9 +53,9 @@ Second part - Options and declarations/macros
 
 %eof{
     System.out.println("\nVariables");
-    System.out.println("a " + a.getLine());
-    System.out.println("b " + b.getLine());
-    System.out.println("c " + c.getLine());
+    System.out.println("a " + aLine);
+    System.out.println("b " + bLine);
+    System.out.println("c " + cLine);
 %eof}
 
 //Macros
