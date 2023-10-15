@@ -19,12 +19,29 @@ Second part - Options and declarations/macros
 
 //Code copied verbatim into the generated class
 %{
-    private int firstOccurenceA;
-    private int firstOccurenceB;
-    private int firstOccurenceC;
+    private boolean firstOccurenceA = false;
+    private boolean firstOccurenceB = false;
+    private boolean firstOccurenceC = false;
+    private Symbol a;
+    private Symbol b;
+    private Symbol c;
 
+    private void alpha(Symbol s) {
+        if(!firstOccurenceA && s.toString().equals("a")){
+            firstOccurenceA = true;
+            a = s;
+        }
 
+        if(!firstOccurenceB && s.toString().equals("b")){
+            firstOccurenceB = true;
+            b = s;
+        }
 
+        if(!firstOccurenceC && s.toString().equals("c")){
+            firstOccurenceC = true;
+            c = s;
+        }
+    }
 %}
 
 //Need to specify another end of file using %eofval because we used a user defined type (Symbol). The default value is null
@@ -36,9 +53,9 @@ Second part - Options and declarations/macros
 
 %eof{
     System.out.println("\nVariables");
-    System.out.println("a " + firstOccurenceA);
-    System.out.println("b " + firstOccurenceB);
-    System.out.println("c " + firstOccurenceC);
+    System.out.println("a " + a.getLine());
+    System.out.println("b " + b.getLine());
+    System.out.println("c " + c.getLine());
 %eof}
 
 //Macros
@@ -82,7 +99,7 @@ that has the longest match.
     {EndOfLine} {yybegin(YYINITIAL);}
 }
 
-{Alpha} {Symbol s = new Symbol(LexicalUnit.VARNAME, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
+{Alpha} {Symbol s = new Symbol(LexicalUnit.VARNAME, yyline, yycolumn, yytext()); alpha(s); System.out.println(s.toString()); return s;}
 {Numeric} {Symbol s = new Symbol(LexicalUnit.NUMBER, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
 {Space} {}
 {EndOfLine} {}
