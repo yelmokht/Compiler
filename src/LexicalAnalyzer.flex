@@ -27,17 +27,17 @@ Second part - Options and declarations/macros
     private int cLine;
 
     private void alpha(Symbol s) {
-        if(!firstOccurenceA && s.toString().equals("a")){
+        if(!firstOccurenceA && s.getValue().toString().equals("a")){
             firstOccurenceA = true;
             aLine = s.getLine();
         }
 
-        if(!firstOccurenceB && s.toString().equals("b")){
+        if(!firstOccurenceB && s.getValue().toString().equals("b")){
             firstOccurenceB = true;
             bLine = s.getLine();
         }
 
-        if(!firstOccurenceC && s.toString().equals("c")){
+        if(!firstOccurenceC && s.getValue().toString().equals("c")){
             firstOccurenceC = true;
             cLine = s.getLine();
         }
