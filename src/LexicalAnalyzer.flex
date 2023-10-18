@@ -64,15 +64,10 @@ AlphaLowerCase = [a-z]
 Alpha = {AlphaUpperCase}|{AlphaLowerCase}
 Numeric = [0-9]
 AlphaNumeric = {Alpha}|{Numeric}
-EndOfLine = "\r"?"\n"
+Variable = {AlphaLowerCase}{AlphaNumeric}*
+Number = {Numeric}+
 Space = "\t" | " "
-Line = .*{EndOfLine}
-Sign = [+-]
-Integer = {Sign}?(([1-9][0-9]*)|0)
-Decimal = \.[0-9]*
-Exponent = [eE]{Integer}
-Real = {Integer}{Decimal}?{Exponent}?
-Identifier = {Alpha}{AlphaNumeric}*
+EndOfLine = "\r"?"\n"
 
 %%
 
@@ -99,10 +94,6 @@ that has the longest match.
     {EndOfLine} {yybegin(YYINITIAL);}
 }
 
-{Alpha} {Symbol s = new Symbol(LexicalUnit.VARNAME, yyline, yycolumn, yytext()); alpha(s); System.out.println(s.toString()); return s;}
-{Numeric} {Symbol s = new Symbol(LexicalUnit.NUMBER, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
-{Space} {}
-{EndOfLine} {}
 "begin" {Symbol s = new Symbol(LexicalUnit.BEG, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
 "end" {Symbol s = new Symbol(LexicalUnit.END, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
 "..." {Symbol s = new Symbol(LexicalUnit.DOTS, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
@@ -126,3 +117,7 @@ that has the longest match.
 "do" {Symbol s = new Symbol(LexicalUnit.DO, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
 "print" {Symbol s = new Symbol(LexicalUnit.PRINT, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
 "read" {Symbol s = new Symbol(LexicalUnit.READ, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
+{Variable} {Symbol s = new Symbol(LexicalUnit.VARNAME, yyline, yycolumn, yytext()); alpha(s); System.out.println(s.toString()); return s;}
+{Number} {Symbol s = new Symbol(LexicalUnit.NUMBER, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
+{Space} {}
+{EndOfLine} {}
