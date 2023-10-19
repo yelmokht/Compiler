@@ -1,0 +1,1 @@
+Contains an executable JAR called part1.jar. The command for running your executable should therefore be: java -jar part1.jar sourceFile.pmp
