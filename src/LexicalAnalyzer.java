@@ -624,9 +624,9 @@ class LexicalAnalyzer {
       zzEOFDone = true;
     
     System.out.println("\nVariables");
-    System.out.println("a " + aLine);
-    System.out.println("b " + bLine);
-    System.out.println("c " + cLine);
+    System.out.println("a\t" + aLine);
+    System.out.println("b\t" + bLine);
+    System.out.println("c\t" + cLine);
     }
   }
 
