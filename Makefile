@@ -8,7 +8,7 @@ SRC_DIR = src
 BUILD_DIR = out/production/Compiler
 JAR_DIR = dist
 
-all: compile run
+all: run
 
 lex: $(SRC_DIR)/LexicalAnalyzer.flex
 	$(JFLEX) $(SRC_DIR)/LexicalAnalyzer.flex
