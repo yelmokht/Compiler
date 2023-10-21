@@ -1,0 +1,30 @@
+token: begin	lexical unit: BEG
+token: read	lexical unit: READ
+token: (	lexical unit: LPAREN
+token: a	lexical unit: VARNAME
+token: )	lexical unit: RPAREN
+token: read	lexical unit: READ
+token: (	lexical unit: LPAREN
+token: b	lexical unit: VARNAME
+token: )	lexical unit: RPAREN
+token: if	lexical unit: IF
+token: a	lexical unit: VARNAME
+>token: b	lexical unit: VARNAME
+token: then	lexical unit: THEN
+token: max	lexical unit: VARNAME
+token: :=	lexical unit: ASSIGN
+token: a	lexical unit: VARNAME
+token: else	lexical unit: ELSE
+token: max	lexical unit: VARNAME
+token: :=	lexical unit: ASSIGN
+token: b	lexical unit: VARNAME
+token: print	lexical unit: PRINT
+token: (	lexical unit: LPAREN
+token: max	lexical unit: VARNAME
+token: )	lexical unit: RPAREN
+token: end	lexical unit: END
+
+Variables
+a	4
+b	5
+max	9

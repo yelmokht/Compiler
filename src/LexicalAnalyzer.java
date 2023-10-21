@@ -7,6 +7,8 @@ First part - User code
 If no javadoc comment, JFlex will generate one automatically
 */
 
+import java.util.*;
+
 /*
 Second part - Options and declarations/macros
 */
@@ -330,27 +332,20 @@ class LexicalAnalyzer {
   private boolean zzEOFDone;
 
   /* user code: */
-    private boolean firstOccurenceA = false;
-    private boolean firstOccurenceB = false;
-    private boolean firstOccurenceC = false;
-    private int aLine;
-    private int bLine;
-    private int cLine;
+    private final List<Symbol> variables = new ArrayList<>();
+
+    private boolean containsValue(List<Symbol> list, Symbol symbol) {
+        for (Symbol s : list) {
+            if (Objects.equals(s.getValue(), symbol.getValue())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private void alpha(Symbol s) {
-        if(!firstOccurenceA && s.getValue().toString().equals("a")){
-            firstOccurenceA = true;
-            aLine = s.getLine();
-        }
-
-        if(!firstOccurenceB && s.getValue().toString().equals("b")){
-            firstOccurenceB = true;
-            bLine = s.getLine();
-        }
-
-        if(!firstOccurenceC && s.getValue().toString().equals("c")){
-            firstOccurenceC = true;
-            cLine = s.getLine();
+        if (!containsValue(variables, s)) {
+            variables.add(s);
         }
     }
 
@@ -624,9 +619,9 @@ class LexicalAnalyzer {
       zzEOFDone = true;
     
     System.out.println("\nVariables");
-    System.out.println("a\t" + aLine);
-    System.out.println("b\t" + bLine);
-    System.out.println("c\t" + cLine);
+    for (Symbol variable : variables) {
+        System.out.println(variable.getValue() + "\t" + variable.getLine());
+    }
     }
   }
 

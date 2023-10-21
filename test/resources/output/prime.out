@@ -1,0 +1,68 @@
+token: begin	lexical unit: BEG
+token: read	lexical unit: READ
+token: (	lexical unit: LPAREN
+token: num	lexical unit: VARNAME
+token: )	lexical unit: RPAREN
+token: isPrime	lexical unit: VARNAME
+token: :=	lexical unit: ASSIGN
+token: true	lexical unit: VARNAME
+token: for	lexical unit: VARNAME
+token: i	lexical unit: VARNAME
+token: :=	lexical unit: ASSIGN
+token: 2	lexical unit: NUMBER
+token: to	lexical unit: VARNAME
+token: sqrt	lexical unit: VARNAME
+token: (	lexical unit: LPAREN
+token: num	lexical unit: VARNAME
+token: )	lexical unit: RPAREN
+token: do	lexical unit: DO
+token: begin	lexical unit: BEG
+token: if	lexical unit: IF
+token: num	lexical unit: VARNAME
+%token: i	lexical unit: VARNAME
+token: =	lexical unit: EQUAL
+token: 0	lexical unit: NUMBER
+token: then	lexical unit: THEN
+token: begin	lexical unit: BEG
+token: isPrime	lexical unit: VARNAME
+token: :=	lexical unit: ASSIGN
+token: false	lexical unit: VARNAME
+token: break	lexical unit: VARNAME
+token: end	lexical unit: END
+token: end	lexical unit: END
+token: if	lexical unit: IF
+token: isPrime	lexical unit: VARNAME
+token: then	lexical unit: THEN
+token: print	lexical unit: PRINT
+token: (	lexical unit: LPAREN
+"Ttoken: he	lexical unit: VARNAME
+token: number	lexical unit: VARNAME
+token: is	lexical unit: VARNAME
+token: prime	lexical unit: VARNAME
+"token: )	lexical unit: RPAREN
+token: else	lexical unit: ELSE
+token: print	lexical unit: PRINT
+token: (	lexical unit: LPAREN
+"Ttoken: he	lexical unit: VARNAME
+token: number	lexical unit: VARNAME
+token: is	lexical unit: VARNAME
+token: not	lexical unit: VARNAME
+token: prime	lexical unit: VARNAME
+"token: )	lexical unit: RPAREN
+token: end	lexical unit: END
+
+Variables
+num	4
+isPrime	5
+true	5
+for	8
+i	8
+to	8
+sqrt	8
+false	12
+break	13
+he	19
+number	19
+is	19
+prime	19
+not	21

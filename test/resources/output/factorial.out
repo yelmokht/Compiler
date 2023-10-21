@@ -1,0 +1,33 @@
+token: begin	lexical unit: BEG
+token: read	lexical unit: READ
+token: (	lexical unit: LPAREN
+token: n	lexical unit: VARNAME
+token: )	lexical unit: RPAREN
+token: fact	lexical unit: VARNAME
+token: :=	lexical unit: ASSIGN
+token: 1	lexical unit: NUMBER
+token: while	lexical unit: WHILE
+token: n	lexical unit: VARNAME
+>token: 0	lexical unit: NUMBER
+token: do	lexical unit: DO
+token: begin	lexical unit: BEG
+token: fact	lexical unit: VARNAME
+token: :=	lexical unit: ASSIGN
+token: fact	lexical unit: VARNAME
+token: *	lexical unit: TIMES
+token: n	lexical unit: VARNAME
+token: n	lexical unit: VARNAME
+token: :=	lexical unit: ASSIGN
+token: n	lexical unit: VARNAME
+token: -	lexical unit: MINUS
+token: 1	lexical unit: NUMBER
+token: end	lexical unit: END
+token: print	lexical unit: PRINT
+token: (	lexical unit: LPAREN
+token: fact	lexical unit: VARNAME
+token: )	lexical unit: RPAREN
+token: end	lexical unit: END
+
+Variables
+n	8
+fact	9

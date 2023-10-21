@@ -1,0 +1,19 @@
+
+
+
+
+'' Simple program to calculate the factorial of a number ''
+
+begin
+  read(n)      ** Read input from the user
+  fact := 1    ** Initialize factorial variable
+
+  ** Calculate factorial using a loop
+  while n > 0 do
+    begin
+      fact := fact * n
+      n := n - 1
+    end
+
+  print(fact)   ** Print the calculated factorial
+end
