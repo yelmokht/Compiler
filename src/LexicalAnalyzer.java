@@ -864,7 +864,7 @@ class LexicalAnalyzer {
           // fall through
           case 47: break;
           case 17:
-            { lastLineComment = yyline; yybegin(LONG_COMMENT_STATE);
+            { lastLineComment = yyline + 1; yybegin(LONG_COMMENT_STATE);
             }
           // fall through
           case 48: break;

@@ -70,7 +70,7 @@ EndOfLine = "\r"?"\n"
 
 //States
 <YYINITIAL> {
-	"''" {lastLineComment = yyline; yybegin(LONG_COMMENT_STATE);}
+	"''" {lastLineComment = yyline + 1; yybegin(LONG_COMMENT_STATE);}
 	"**" {yybegin(SHORT_COMMENT_STATE);}
 }
 
