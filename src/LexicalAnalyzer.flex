@@ -1,26 +1,24 @@
-/*
-First part - User code
-If no javadoc comment, JFlex will generate one automatically
-*/
-
 import java.util.*;
 
-/*
-Second part - Options and declarations/macros
-*/
+/**
+ * LexicalAnalyzer class generates a lexical analyzer with a defined language to process input files.
+ * This class recognizes keywords, operators, variables, numbers, handles comments, and reports unrecognized symbols.
+ */
+
 %%
 
-%class LexicalAnalyzer    //Generate class with the name LexicalAnalyzer and write the code in the file LexicalAnalyzer.java
-%unicode 		//Enable unicode input
-%char           //Enable char counting
-%line 			//Enable line counting
-%column 		//Enable column counting
-%type Symbol    //Enable returned values of type Symbol as tokens
-%standalone 	//Generate a scanner that is not called by a parser
+%class LexicalAnalyzer      //Generate class with the name LexicalAnalyzer.java
+%unicode 		            //Enable unicode input
+%char                       //Enable char counting
+%line 			            //Enable line counting
+%column 		            //Enable column counting
+%type Symbol                //Enable returned values of type Symbol as tokens
+%standalone 	            //Generate a scanner that is not called by a parser
 %xstate YYINITIAL, LONG_COMMENT_STATE, SHORT_COMMENT_STATE
 
-//Code copied verbatim into the generated class
+//Java code
 %{
+    private int lastLineComment;
     private final List<Symbol> variables = new ArrayList<>();
 
     private boolean containsValue(List<Symbol> list, Symbol symbol) {
@@ -39,19 +37,23 @@ Second part - Options and declarations/macros
     }
 %}
 
-//Need to specify another end of file using %eofval because we used a user defined type (Symbol). The default value is null
-//The code included in %eofval{ ... %eofval} will be copied verbatim into the scanning method and will be executed each time the end of file is reached.
-//We don"t use %eof because it is executed once instead of each time
-%eofval{
-	return new Symbol(LexicalUnit.EOS, yyline, yycolumn);
-%eofval}
-
+//The code in %eof is reached when EOF is reached
 %eof{
+    if (yystate() == LONG_COMMENT_STATE) {
+        System.err.println("Unclosed comment detected at line : " + lastLineComment);
+    }
+
     System.out.println("\nVariables");
     for (Symbol variable : variables) {
         System.out.println(variable.getValue() + "\t" + variable.getLine());
     }
 %eof}
+
+//After %eof, we go to the %eofval. Since we used a user defined type (Symbol), we need to return this type at the end.
+%eofval{
+    System.out.println(""); //To match euclid.out space at the end
+	return new Symbol(LexicalUnit.EOS, yyline, yycolumn);
+%eofval}
 
 //Macros
 AlphaUpperCase = [A-Z]
@@ -66,21 +68,14 @@ EndOfLine = "\r"?"\n"
 
 %%
 
-/*
-Third part - Regular expression and actions
-
-These regular expressions and actions are executed when the scanner matches the associated regular expression.
-As the scanner reads its input, it keeps track of all regular expressions and activates the action of the expression
-that has the longest match.
-*/
-
+//States
 <YYINITIAL> {
-	"''" {yybegin(LONG_COMMENT_STATE);}
+	"''" {lastLineComment = yyline; yybegin(LONG_COMMENT_STATE);}
 	"**" {yybegin(SHORT_COMMENT_STATE);}
 }
 
 <LONG_COMMENT_STATE> {
-    . {}
+    .|{EndOfLine} {}
     "''" {yybegin(YYINITIAL);}
 }
 
@@ -89,6 +84,7 @@ that has the longest match.
     {EndOfLine} {yybegin(YYINITIAL);}
 }
 
+//Regular expressions
 "begin" {Symbol s = new Symbol(LexicalUnit.BEG, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
 "end" {Symbol s = new Symbol(LexicalUnit.END, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
 "..." {Symbol s = new Symbol(LexicalUnit.DOTS, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
@@ -116,3 +112,4 @@ that has the longest match.
 {Number} {Symbol s = new Symbol(LexicalUnit.NUMBER, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
 {Space} {}
 {EndOfLine} {}
+. {System.out.println("Unrecognized symbol: " + yytext());}

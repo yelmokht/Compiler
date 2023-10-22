@@ -7,8 +7,8 @@ import java.io.PrintStream;
  * redirect the sequence of matched lexical units along with the symbol table content to a file.
  */
 public class Redirect {
-    private static final String inputFilePath = "test/resources/input/euclid.pmp";
-    private static final String outputFilePath = "test/resources/output/temp.out";
+    private static final String inputFilePath = "test/resources/input/maximum.pmp";
+    private static final String outputFilePath = "test/resources/output/maximum.out";
     private static PrintStream outputStream;
     public static void main(String[] args) throws IOException {
         redirectStandardOutputStream();

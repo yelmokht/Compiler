@@ -1,14 +1,9 @@
-
-
-
-
-'' Simple program to calculate the factorial of a number ''
-
+'' Factorial ''
+''
 begin
-  read(n)      ** Read input from the user
-  fact := 1    ** Initialize factorial variable
+  read(n)
+  fact := 1
 
-  ** Calculate factorial using a loop
   while n > 0 do
     begin
       fact := fact * n
@@ -17,3 +12,4 @@ begin
 
   print(fact)   ** Print the calculated factorial
 end
+''

@@ -1,14 +1,14 @@
-'' Simple program to find the maximum of two numbers ''
+
+
+
+'' Maximum
 
 begin
   read(a)      ** Read the first number from the user
   read(b)      ** Read the second number from the user
-
-** Check which number is greater
   if a > b then
     max := a
   else
     max := b
-
   print(max)   ** Print the maximum of the two numbers
 end
