@@ -35,6 +35,10 @@ import java.util.*;
             variables.add(s);
         }
     }
+    private void exit() {
+        System.out.println("Exiting...");
+        System.exit(1);
+    }
 %}
 
 //The code in %eof is reached when EOF is reached
@@ -112,4 +116,4 @@ EndOfLine = "\r"?"\n"
 {Number} {Symbol s = new Symbol(LexicalUnit.NUMBER, yyline, yycolumn, yytext()); System.out.println(s.toString()); return s;}
 {Space} {}
 {EndOfLine} {}
-. {System.out.println("Unrecognized symbol: " + yytext());}
+. {System.out.println("Unrecognized symbol: " + yytext());exit();}
