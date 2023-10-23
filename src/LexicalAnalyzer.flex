@@ -14,7 +14,7 @@ import java.util.*;
 %column 		            //Enable column counting
 %type Symbol                //Enable returned values of type Symbol as tokens
 %standalone 	            //Generate a scanner that is not called by a parser
-%xstate YYINITIAL, LONG_COMMENT_STATE, SHORT_COMMENT_STATE, STRANGE_STATE 
+%xstate YYINITIAL, LONG_COMMENT_STATE, SHORT_COMMENT_STATE, EXIT_STATE
 
 //Java code
 %{
@@ -37,8 +37,7 @@ import java.util.*;
     }
     private void exit() {
         System.out.println("Exiting...");
-        yybegin(STRANGE_STATE);
-        
+        yybegin(EXIT_STATE);
     }
 %}
 
@@ -47,11 +46,11 @@ import java.util.*;
     if (yystate() == LONG_COMMENT_STATE) {
         System.err.println("Unclosed comment detected at line : " + lastLineComment);
     }
-    if (yystate()==YYINITIAL){    
+    if (yystate()==YYINITIAL){
         System.out.println("\nVariables");
         for (Symbol variable : variables) {
             System.out.println(variable.getValue() + "\t" + variable.getLine());
-        }       
+        }
     }
 %eof}
 
@@ -89,7 +88,8 @@ EndOfLine = "\r"?"\n"
     . {}
     {EndOfLine} {yybegin(YYINITIAL);}
 }
-<STRANGE_STATE> {
+
+<EXIT_STATE> {
     . {}
     {EndOfLine} {}
 }
