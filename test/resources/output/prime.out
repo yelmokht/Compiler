@@ -1,0 +1,17 @@
+token: begin	lexical unit: BEG
+token: read	lexical unit: READ
+token: (	lexical unit: LPAREN
+token: num	lexical unit: VARNAME
+token: )	lexical unit: RPAREN
+token: isPrime	lexical unit: VARNAME
+token: :=	lexical unit: ASSIGN
+token: true	lexical unit: VARNAME
+token: for	lexical unit: VARNAME
+token: i	lexical unit: VARNAME
+token: :=	lexical unit: ASSIGN
+token: 2	lexical unit: NUMBER
+token: to	lexical unit: VARNAME
+token: num	lexical unit: VARNAME
+Unrecognized symbol: ^
+Exiting...
+

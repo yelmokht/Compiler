@@ -1,1 +1,1 @@
-Contains the JAVADOC and the PDF report
+Ths folder contains the JAVADOC and the PDF report.

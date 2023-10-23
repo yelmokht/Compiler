@@ -1,1 +1,1 @@
-Contains all other files.
+This folder contains all other files.
