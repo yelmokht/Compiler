@@ -1,8 +1,8 @@
-This folder contains an executable JAR called part1.jar.
+This folder contains an executable JAR called part2.jar.
 The command for running the executable is the following:
 
 ```bash
-java -jar part1.jar sourceFile.pmp
+java -jar part2.jar sourceFile.pmp
 ```
 
 Alternatively, you can use the command provided in the Makefile:

@@ -1,7 +1,7 @@
-# Compiler - Part 1: Project on Language Theory and Compiling (INFO-F403)
+# Compiler - Part 2: Project on Language Theory and Compiling (INFO-F403)
 
 This goal of this project is to build a compiler designed for PASCALMAISPRESQUE, a simple imperative language.
-In this first part, we implemented the lexical analyzer for the compiler using JFlex.
+In this second part, we implemented the parser for the compiler using JFlex.
 
 # Compilation
 To compile the project into a .jar file, you can use the following command in your terminal:
