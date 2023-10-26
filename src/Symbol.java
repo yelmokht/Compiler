@@ -1,6 +1,7 @@
 public class Symbol{
 	public static final int UNDEFINED_POSITION = -1;
 	public static final Object NO_VALUE = null;
+	
 	private final LexicalUnit type;
 	private final Object value;
 	private final int line,column;
