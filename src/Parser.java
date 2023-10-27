@@ -1,5 +1,5 @@
 /**
- * Parser class is recursive descent LL(1) parser which parses a given input string according to the action table
+ * Parser class is recursive descent LL(1) parser which parses a given input file according to the action table
  * from the PASCALMAISPRESQUE grammer (see project pdf).
  */
 public class Parser {

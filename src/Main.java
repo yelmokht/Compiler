@@ -1,29 +1,33 @@
 /**
- * Main class parses a given input string and generates the parse tree of the input string in LaTeX.
+ * Main class parses a given input file and generates the parse tree of the input file in LaTeX.
  * Ensures also that the command is correctly written and handles errors.
  */
 public class Main {
 
     public static void main(String[] args) {
-        if (args.length == 3) {
-            if ("-wt".equals(args[1])) {
-                String input = args[0].replace("\"", ""); // Remove quotes from the first argument.
-                String filename = args[2];
+        if (args.length < 1 || args.length > 3) {
+            throw new IllegalArgumentException("Incorrect number of arguments. Usage: java Main <input_file> or java Main -wt <filename.tex> <input_file>");
+        }
 
-                if (filename.endsWith(".tex")) {
-                    Parser parser = new Parser();
-                    parser.parse(input);
-
-                    ParseTree parseTree = new ParseTree(input, filename);
-                    parseTree.toLatex();
-                } else {
-                    throw new IllegalArgumentException("The filename must end with .tex");
-                }
-            } else {
-                throw new IllegalArgumentException("Use -wt <filename.tex> to write the parse tree in LaTeX.");
-            }
+        if (args.length == 1 && !args[0].equals("-wt")) {
+            String inputFile = args[0];
+            parseAndBuildParseTree(inputFile, null); //We don't output the parse tree
+        } else if (args.length == 3 && args[0].equals("-wt") && args[1].endsWith(".tex")) {
+            String filename = args[1];
+            String inputFile = args[2];
+            parseAndBuildParseTree(inputFile, filename);
         } else {
-            throw new IllegalArgumentException("Insufficient arguments. Usage: java Main \"input_string\" -wt <filename.tex>");
+            throw new IllegalArgumentException("Invalid arguments. Use -wt <filename.tex> <input_file>");
+        }
+    }
+
+    private static void parseAndBuildParseTree(String inputFile, String filename) {
+        Parser parser = new Parser();
+        parser.parse(inputFile);
+
+        if (filename != null) {
+            ParseTree parseTree = new ParseTree(inputFile, filename);
+            parseTree.toLatex();
         }
     }
 }
