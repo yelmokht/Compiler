@@ -29,5 +29,5 @@ If you prefer, you can use the precompiled JAR file by executing:
 make launch
 ```
 
-This command utilizes the part1.jar file generated during the compilation process. If you want to read a different file,
+This command utilizes the part2.jar file generated during the compilation process. If you want to read a different file,
 you have to modify the filename in the Makefile (change "FILE_NAME = euclid.pmp").
