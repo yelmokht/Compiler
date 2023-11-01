@@ -15,7 +15,7 @@ public class Main {
 
         if (args.length == 1 && !args[0].equals("-wt")) {
             String inputFile = args[0];
-            parseAndBuildParseTree(inputFile, null); //We don't output the parse tree
+            parseAndBuildParseTree(inputFile, null); //Argument optionnel -wt
         } else if (args.length == 3 && args[0].equals("-wt") && args[1].endsWith(".tex")) {
             String filename = args[1];
             String inputFile = args[2];
@@ -30,13 +30,10 @@ public class Main {
         Parser parser = new Parser();
 
         //Get the grammar for file
-        Map<Integer, Map<String, List<String>>> contextFreeGrammar = parseTools.makeListFromGrammar("src/resources/CFG.pmp");
+        Map<Integer, Map<String, List<String>>> contextFreeGrammar = parseTools.makeMapFromGrammar("src/resources/CFG.pmp");
 
-        //Check if grammar is LL(1). If not, try to transform the grammar
-        if (!parseTools.isGrammarLL1(contextFreeGrammar)) {
-            System.out.println("Your grammar is not LL(1)");
-            contextFreeGrammar = parseTools.transformGrammar(contextFreeGrammar);
-        }
+        //1. Transform grammar
+        contextFreeGrammar = parseTools.transformGrammar(contextFreeGrammar);
 
         //If grammar is LL(1), parse the file
         if(parseTools.isGrammarLL1(contextFreeGrammar)) {

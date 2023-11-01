@@ -10,7 +10,7 @@ public class ParseTools {
     public ParseTools(){
     }
 
-    public Map<Integer, Map<String, List<String>>> makeListFromGrammar(String file) throws IOException {
+    public Map<Integer, Map<String, List<String>>> makeMapFromGrammar(String file) throws IOException {
         Map<Integer, Map<String, List<String>>> cfg = new HashMap<>();
         List<String> lines = Files.readAllLines(Paths.get(file));
 
@@ -23,6 +23,7 @@ public class ParseTools {
             rule.put(leftHandSide, new ArrayList<>(List.of(rightHandSide.split(" "))));
             cfg.put(number, rule);
         }
+        System.out.println(cfg);
         return cfg;
     }
 
@@ -91,6 +92,7 @@ public class ParseTools {
 
     private void removeAmbiguities() {
         //TODO => make grammar non-ambiguous and take into account priorities
+        //Checkez si possible d'implémenter un algorithme pour ça
     }
 
     public void removeLeftRecursion() {
