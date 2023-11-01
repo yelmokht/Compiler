@@ -3,10 +3,10 @@
  */
 public class ParseTree {
     public ParseTree(String filename, String input) {
-        //TODO mais déjà donner par les assistants
+        //TODO
     }
 
     public void toLatex() {
-        //TODO mais déjà donner par les assistants
+        //TODO
     }
 }

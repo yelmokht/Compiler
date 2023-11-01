@@ -1,25 +1,29 @@
+import java.util.List;
+import java.util.Map;
+
 /**
- * Parser class is recursive descent LL(1) parser which parses a given input file according to the action table
- * from the PASCALMAISPRESQUE grammer (see project pdf).
+ * Parser class is a recursive descent LL(k) parser that parses a given input file according to its action table and
+ * its CFG.
  */
 public class Parser {
 
+    /**
+     * Constructs a new Parser.
+     */
     public Parser() {
-        //TODO
     }
 
     /**
-     * Parse the input and print the leftmost derivation of the input
-     * @param input - String input
+     * Parses the input and prints the leftmost derivation of the given input word.
+     *
+     * @param contextFreeGrammar An LL(1) Context-Free Grammar.
+     * @param actionTable The action table of the Context-Free Grammar.
+     * @param inputWord The input word to be parsed.
+     * @return True if the input word is a valid part of the grammar and prints the leftmost derivation.
+     *         False if the input word is not part of the grammar, and an explanatory error is thrown.
      */
-    public void parse(String input) {
-        //TODO
-        /*
-        if (input is part of the grammer) {
-            output on stdout the leftmost derivation of the input
-        } else {
-            throw explanatory error message why the input is not part of the grammar
-        }
-        */
+    public boolean parse(Map<Integer, Map<String, List<String>>> contextFreeGrammar, int[][] actionTable, String inputWord) {
+        // TODO: Implement the parsing algorithm
+        return false;
     }
 }

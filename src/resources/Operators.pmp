@@ -1,0 +1,6 @@
+[1] - (unary) - right
+[2] *, / - left
+[3] +, - (binary) - left
+[4] <, = - left
+[5] and - left
+[6] or - left
