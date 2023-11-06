@@ -50,67 +50,11 @@ public class ParseTools {
         return null;
     }
 
-    private boolean isUnambiguous(Map<Integer, Map<String, List<String>>> grammar) {
-        //TODO => return one tree => deterministic
-        // Or take into account the properties
-        // Check that derivation trees respect the priority of operators
-        // We can also check all the derivations
-        // Instead we use the stronger definition that use first set and follow set
-        // And check if there is things in common. If no, then it is true
-        return false;
-    }
-
-    private boolean containsLeftRecursion(Map<Integer, Map<String, List<String>>> grammar) {
-        //TODO
-        // Check that there at least two left hand side rules
-        return false;
-    }
-
-    private boolean containsCommonPrefixes(Map<Integer, Map<String, List<String>>> grammar) {
-        //TODO
-        // Check there is at least two same right hand side rule (prefix)
-        return false;
-    }
-
     public boolean isGrammarLL1(Map<Integer, Map<String, List<String>>> grammar){
-        return isUnambiguous(grammar) && !containsLeftRecursion(grammar) && !containsCommonPrefixes(grammar);
-    }
-
-    private void removeUnproductiveVariables() {
-        //TODO => Algorithm
-    }
-
-    private void removeUnreachableVariables() {
-        //TODO => Algorithm
-    }
-
-    public void removeUselessVariables() {
-        //TODO => Algorithm
-        removeUnproductiveVariables();
-        removeUnreachableVariables();
-    }
-
-    private void removeAmbiguities() {
-        //TODO => make grammar non-ambiguous and take into account priorities
-        //Checkez si possible d'implémenter un algorithme pour ça
-    }
-
-    public void removeLeftRecursion() {
-        //TODO => Algorithm
-    }
-
-    public void applyFactoring() {
         //TODO
+        return false;
     }
 
-    public Map<Integer, Map<String, List<String>>> transformGrammar(Map<Integer, Map<String, List<String>>> cfg) {
-        //TODO => Algorithm
-        removeUselessVariables();
-        removeAmbiguities(); //Only if the grammar has ambiguities
-        removeLeftRecursion();
-        applyFactoring(); //When needed
-        return cfg;
-    }
 
     public int[][] constructLL1ActionTableFromCFG(Map<Integer, Map<String, List<String>>> contextFreeGrammar){
         //TODO
