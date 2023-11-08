@@ -29,10 +29,9 @@ public class Main {
         ParseTools parseTools = new ParseTools();
         Parser parser = new Parser();
 
-        //Get the transformed grammar for file
+        //Get the transformed grammar from file
         ContextFreeGrammar contextFreeGrammar = new ContextFreeGrammar("src/resources/CFG.pmp");
 
-        System.exit(0);
         //If grammar is LL(1), parse the file
         if(parseTools.isGrammarLL1(contextFreeGrammar)) {
             int[][] actionTable = parseTools.constructLL1ActionTableFromCFG(contextFreeGrammar);
