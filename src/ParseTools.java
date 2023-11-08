@@ -1,6 +1,3 @@
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -10,53 +7,93 @@ public class ParseTools {
     public ParseTools(){
     }
 
-    public Map<Integer, Map<String, List<String>>> makeMapFromGrammar(String file) throws IOException {
-        Map<Integer, Map<String, List<String>>> cfg = new HashMap<>();
-        List<String> lines = Files.readAllLines(Paths.get(file));
-
-        for (String line : lines) {
-            int number = Integer.parseInt(line.substring(line.indexOf("[") + 1, line.indexOf("]")));
-            String leftHandSide = line.substring(line.indexOf("]") + 2, line.indexOf("→") - 1);
-            String rightHandSide = line.substring(line.indexOf("→") + 2);
-
-            Map<String, List<String>> rule = new HashMap<>();
-            rule.put(leftHandSide, new ArrayList<>(List.of(rightHandSide.split(" "))));
-            cfg.put(number, rule);
+    private Set<String> firstK(Map<String, Set<String>> firstKMap, String x) {
+        if (!firstKMap.containsKey(x)) {
+            return new LinkedHashSet<>();
+        } else {
+            return firstKMap.get(x);
         }
-        System.out.println(cfg);
-        return cfg;
     }
 
-    private Set<String> firstK() {
+    public Map<String, Set<String>> constructFirstKSets(Map<Integer, Rule> cfg) {
+        Map<String, Set<String>> firstKMap = new LinkedHashMap<>();
+
+        //Initialization
+        for (Rule rule : cfg.values()) {
+            if (!firstKMap.containsKey(rule.getLeftHandSide())) {
+                firstKMap.put(rule.getLeftHandSide(), firstK(firstKMap, rule.getLeftHandSide()));
+            }
+        }
+
+        boolean atLeastOneFirstKSetHasBeenUpdated = true;
+        while (atLeastOneFirstKSetHasBeenUpdated) {
+            atLeastOneFirstKSetHasBeenUpdated = false;
+            for (Rule rule : cfg.values()) {
+
+                Set<String> set = new LinkedHashSet<>();
+                for (String x : rule.getRightHandSide()) {
+                    set.addAll(firstK(firstKMap, x));
+                }
+
+                Set<String> copySet  = firstKMap.get(rule.getLeftHandSide());
+                firstKMap.get(rule.getLeftHandSide()).addAll(set);
+
+                if (!atLeastOneFirstKSetHasBeenUpdated && !copySet.equals(firstKMap.get(rule.getLeftHandSide()))) {
+                    atLeastOneFirstKSetHasBeenUpdated = true;
+                }
+                set.clear();
+            }
+        }
+        return firstKMap;
+    }
+
+    private Set<String> followK(Map<String, Set<String>> firstKMap, String x) {
         //TODO
         return null;
     }
 
-    public Map<String, Set<String>> constructFirstSets(Map<Integer, Map<String, List<String>>> cfg) {
-        //TODO => Algorithm
-        // List of Hash map<String, Set<Lexical Unit>>
-        // Update until each set hash map doesnt update
-        return null;
+
+    public Map<String, Set<String>> constructFollowKSets(Map<Integer, Rule> cfg) {
+        Map<String, Set<String>> followKMap = new LinkedHashMap<>();
+        return followKMap;
     }
 
-    private Set<String> followK() {
-        //TODO
-        return null;
+    public boolean isGrammarLL1(ContextFreeGrammar cfg) {
+        //Compute the First and Follow sets
+        /*
+        Map<String, Set<String>> firstKSets = constructFirstKSets(cfg);
+        Map<String, Set<String>> followKSets = constructFollowKSets(cfg);
+
+        for (Rule rule : cfg.values()) {
+
+            //Check the rules that are multiples
+            ArrayList<Rule> multipleOccurences = new ArrayList<>();
+            for (Rule r : cfg.values()) {
+                if (rule.getLeftHandSide().equals(r.getLeftHandSide())) {
+                    multipleOccurences.add(r);
+                }
+            }
+
+            //Apply the definition
+            Set<String> set = new LinkedHashSet<>();
+            for (Rule x : multipleOccurences) {
+                Set<String> newSet = firstK(firstKSets, rule.getRightHandSide() + followK(followKSets, rule.getLeftHandSide()));
+                set.retainAll(newSet);
+            }
+
+            if (!set.isEmpty()){
+                return false;
+            }
+
+        }
+
+         */
+        return true;
     }
 
 
-        public Map<String, Set<String>> constructFollowSets(Map<Integer, Map<String, List<String>>> cfg) {
-        //TODO => Algorithm
-        return null;
-    }
 
-    public boolean isGrammarLL1(Map<Integer, Map<String, List<String>>> grammar){
-        //TODO
-        return false;
-    }
-
-
-    public int[][] constructLL1ActionTableFromCFG(Map<Integer, Map<String, List<String>>> contextFreeGrammar){
+    public int[][] constructLL1ActionTableFromCFG(ContextFreeGrammar contextFreeGrammar){
         //TODO
         return null;
     }

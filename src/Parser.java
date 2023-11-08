@@ -1,6 +1,3 @@
-import java.util.List;
-import java.util.Map;
-
 /**
  * Parser class is a recursive descent LL(k) parser that parses a given input file according to its action table and
  * its CFG.
@@ -22,7 +19,7 @@ public class Parser {
      * @return True if the input word is a valid part of the grammar and prints the leftmost derivation.
      *         False if the input word is not part of the grammar, and an explanatory error is thrown.
      */
-    public boolean parse(Map<Integer, Map<String, List<String>>> contextFreeGrammar, int[][] actionTable, String inputWord) {
+    public boolean parse(ContextFreeGrammar contextFreeGrammar, int[][] actionTable, String inputWord) {
         // TODO: Implement the parsing algorithm
         return false;
     }

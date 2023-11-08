@@ -29,12 +29,10 @@ public class Main {
         ParseTools parseTools = new ParseTools();
         Parser parser = new Parser();
 
-        //Get the grammar for file
-        Map<Integer, Map<String, List<String>>> contextFreeGrammar = parseTools.makeMapFromGrammar("src/resources/CFG.pmp");
+        //Get the transformed grammar for file
+        ContextFreeGrammar contextFreeGrammar = new ContextFreeGrammar("src/resources/CFG.pmp");
 
-        //1. Transform grammar
-        contextFreeGrammar = parseTools.transformGrammar(contextFreeGrammar);
-
+        System.exit(0);
         //If grammar is LL(1), parse the file
         if(parseTools.isGrammarLL1(contextFreeGrammar)) {
             int[][] actionTable = parseTools.constructLL1ActionTableFromCFG(contextFreeGrammar);
@@ -45,8 +43,8 @@ public class Main {
 
         //If filename is given, return the parse tree in LaTeX
         if (filename != null) {
-            ParseTree parseTree = new ParseTree(inputFile, filename);
-            parseTree.toLatex();
+            //ParseTree parseTree = new ParseTree(inputFile, filename);
+            //parseTree.toLatex();
         }
     }
 }

@@ -1,34 +1,41 @@
 [1] <Program> → begin <Code> end
-[2] <Code> → ε
-[3] <Code> → <InstList>
-[4] <InstList> → <Instruction>
-[5] <InstList> → <Instruction> ... <InstList>
-[6] <Instruction> → <Assign>
-[7] <Instruction> → <If>
-[8] <Instruction> → <While>
-[9] <Instruction> → <For>
+[2] <Code> → <InstList>
+[3] <Code> → ε
+[4] <InstList> → <Instruction> <InstList'>
+[5] <InstList'> → ... <InstList>
+[6] <InstList'> → ε
+[7] <Instruction> → <Assign>
+[8] <Instruction> → <If>
+[9] <Instruction> → <While>
 [10] <Instruction> → <Print>
 [11] <Instruction> → <Read>
 [12] <Instruction> → begin <InstList> end
 [13] <Assign> → [VarName] := <ExprArith>
-[14] <ExprArith> → [VarName]
-[15] <ExprArith> → [Number]
-[16] <ExprArith> → ( <ExprArith> )
-[17] <ExprArith> → - <ExprArith>
-[18] <ExprArith> → <ExprArith> <Op> <ExprArith>
-[19] <Op> → +
-[20] <Op> → -
-[21] <Op> → *
-[22] <Op> → /
-[23] <If> → if <Cond> then <Instruction>
-[24] <If> → if <Cond> then <Instruction> else <Instruction>
-[25] <Cond> → <Cond> and <Cond>
-[26] <Cond> → <Cond> or <Cond>
-[27] <Cond> → { <Cond> }
-[28] <Cond> → <SimpleCond>
-[29] <SimpleCond> → <ExprArith> <Comp> <ExprArith>
-[30] <Comp> → =
-[31] <Comp> → <
-[32] <While> → while <Cond> do <Instruction>
-[33] <Print> → print([VarName])
-[34] <Read> → read([VarName])
+[14] <ExprArith> → <ExprProd> <ExprArith'>
+[16] <ExprArith'> → + <ExprProd> <ExprArith'>
+[17] <ExprArith'> → - <ExprProd> <ExprArith'>
+[18] <ExprArith'> → ε
+[19] <ExprProd> → <Term> <ExprProd'>
+[20] <ExprProd'> → * <Term> <ExprProd'>
+[21] <ExprProd'> → / <Term> <ExprProd'>
+[22] <ExprProd'> → ε
+[23] <Term> → - <Term>
+[24] <Term> → ( <Term> )
+[25] <Term> → [VarName]
+[26] <Term> → [Number]
+[27] <If> → if <Cond> then <Instruction> <If'>
+[28] <If'> → else <Instruction>
+[29] <If'> → ε
+[30] <Cond> → <CondConj> <Cond'>
+[31] <Cond> → { <Cond> }
+[32] <Cond'> → or <CondConj> <Cond'>
+[33] <Cond'> → ε
+[34] <CondConj> → <SimpleCond> <CondConj'>
+[35] <CondConj'> → and <SimpleCond> <CondConj'>
+[36] <CondConj'> → ε
+[37] <SimpleCond> → <ExprArith> <Comp> <ExprArith>
+[38] <Comp> → =
+[39] <Comp> → <
+[40] <While> → while <Cond> do <Instruction>
+[41] <Print> → print([VarName])
+[42] <Read> → read([VarName])
