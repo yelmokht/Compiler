@@ -8,6 +8,7 @@ public class ParseTools {
     private Map<String, Set<String>> followKSets = new LinkedHashMap<>();
     private int[][] actionTable;
     public static final String EPSILON = "ε";
+    public static final String FOLLOW = "Follow";
 
 
     public ParseTools(){}
@@ -43,15 +44,16 @@ public class ParseTools {
         //si le premier character est un terminal, tu retournes First(T)
         //si c'est epsilon, tu retounes le follow
         //sinon tu retournes le follow
-        if (x.contains("followK")) {
+        if (x.contains(FOLLOW)) {
             String firstChar = x.substring(0,1);
-            String content = x.substring(x.indexOf('(') + 1, x.indexOf(')'));
+            String content = x.substring(x.indexOf(FOLLOW) + 1);
 
             // Check if the first character is a terminal and not epsilon
             if (contextFreeGrammar.getTerminals().contains(firstChar) && !firstChar.equals(EPSILON)) {
                 return firstK(contextFreeGrammar, firstChar);
             } else {
-                return followK(followKSets, content);
+                System.out.println("OK!");
+                return followK(contextFreeGrammar, content);
             }
         } else {
             throw new IllegalArgumentException("Cannot compute firstK");
@@ -98,7 +100,7 @@ public class ParseTools {
         return firstKSets;
     }
 
-    private Set<String> followK(Map<String, Set<String>> firstKMap, String x) {
+    private Set<String> followK(ContextFreeGrammar contextFreeGrammar, String x) {
         //TODO
         return null;
     }
@@ -109,6 +111,38 @@ public class ParseTools {
         return null;
     }
 
+    public List<List<Integer>> occurrencesRules(ContextFreeGrammar contextFreeGrammar) {
+        //To simplify
+        List<List<Integer>> list = new LinkedList<>();
+        Map<Integer, Rule> rules = contextFreeGrammar.getRules();
+
+        Set<Integer> processedRules = new HashSet<>();
+
+        for (int ruleNumber1 : rules.keySet()) {
+            if (!processedRules.contains(ruleNumber1)) {
+                List<Integer> subList = new LinkedList<>();
+                subList.add(ruleNumber1);
+
+                for (int ruleNumber2 : rules.keySet()) {
+                    if (ruleNumber1 != ruleNumber2 && rules.get(ruleNumber1).getLeftHandSide().equals(rules.get(ruleNumber2).getLeftHandSide())) {
+                        subList.add(ruleNumber2);
+                        processedRules.add(ruleNumber2);
+                    }
+                }
+
+                if (subList.size() > 1) {
+                    list.add(subList);
+                }
+
+                processedRules.add(ruleNumber1);
+            }
+        }
+
+        return list;
+    }
+
+
+
     public boolean isGrammarLL1(ContextFreeGrammar contextFreeGrammar) {
         //Compute the First and Follow sets
         firstKSets = constructFirstKSets(contextFreeGrammar);
@@ -117,32 +151,26 @@ public class ParseTools {
         System.out.println("First K sets: " + firstKSets);
         System.out.println("Follow K sets: " + followKSets);
 
-        /*
-        for (Rule rule : contextFreeGrammar.getRules().values()) {
+        //Liste des règles qui apparaissent plus d'une fois
+        List<List<Integer>> listRules = occurrencesRules(contextFreeGrammar);
 
-            //Check the rules that are multiples
-            ArrayList<Rule> multipleOccurences = new ArrayList<>();
-            for (Rule r : contextFreeGrammar.getRules().values()) {
-                if (rule.getLeftHandSide().equals(r.getLeftHandSide())) {
-                    multipleOccurences.add(r);
+        System.out.println(listRules);
+
+        for (List<Integer> sameRules : listRules) {
+            Set<String> set = new LinkedHashSet<>();
+            for (int ruleNumber : sameRules) {
+                String leftHandSide = contextFreeGrammar.getRules().get(ruleNumber).getLeftHandSide();
+                String rightHandSide = contextFreeGrammar.getRules().get(ruleNumber).getRightHandSide().toString();
+                String definition = rightHandSide + FOLLOW + leftHandSide;
+                Set<String> firstKset = firstK(contextFreeGrammar, definition);
+                set.retainAll(firstKset);
+                if (!set.isEmpty()) {
+                    return false;
                 }
             }
-
-            //Apply the definition
-            Set<String> set = new LinkedHashSet<>();
-            for (Rule x : multipleOccurences) {
-                Set<String> newSet = firstK(firstK  Sets, x.getRightHandSide() + followK(followKSets, rule.getLeftHandSide())); //on doit aussi envoyer le followK sets
-                set.retainAll(newSet);
-            }
-
-            if (!set.isEmpty()){
-                return false;
-            }
-
         }
 
-         */
-        return false;
+        return true;
     }
 
 
