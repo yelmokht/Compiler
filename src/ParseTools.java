@@ -26,33 +26,27 @@ public class ParseTools {
     }
 
     private Set<String> firstK(ContextFreeGrammar contextFreeGrammar, String x) {
-        //Doit pouvoir gérer First(T) = {T}
-        //Ici, c'est une map d'alphabet, tu checks si y'a et tu retournes. Sinon, tu checkes que c'est un terminal et tu retournes {T} (en l'ayant ajouté à la map)
         if (contextFreeGrammar.getTerminals().contains(x)) {
             firstKSets.putIfAbsent(x, new LinkedHashSet<>(Set.of(x))); // Check and initialize if absent
             return firstKSets.get(x);
         }
 
-        //Doit pouvoir gérer First(V) = {}
-        //Ici, c'sst à initialisation, tu checks dans la map d'abord, si y'a pas, alors tu mets {}
         if (contextFreeGrammar.getVariables().contains(x)) {
             firstKSets.putIfAbsent(x, new LinkedHashSet<>()); // Check and initialize if absent
             return firstKSets.get(x);
         }
 
-        //Doit pouvoir gérer First(rightHandSideFollow(V))
-        //si le premier character est un terminal, tu retournes First(T)
-        //si c'est epsilon, tu retounes le follow
-        //sinon tu retournes le follow
         if (x.contains(FOLLOW)) {
-            String firstChar = x.substring(0,1);
-            String content = x.substring(x.indexOf(FOLLOW) + 1);
+            String firstChar = x.substring(0,x.indexOf("<"));
+            String content = x.substring(x.indexOf(FOLLOW));
+            System.out.println("X : " + x);
+            System.out.println("First char : " + firstChar);
+            System.out.println("Content : " + content);
 
             // Check if the first character is a terminal and not epsilon
             if (contextFreeGrammar.getTerminals().contains(firstChar) && !firstChar.equals(EPSILON)) {
                 return firstK(contextFreeGrammar, firstChar);
             } else {
-                System.out.println("OK!");
                 return followK(contextFreeGrammar, content);
             }
         } else {
@@ -71,24 +65,17 @@ public class ParseTools {
             //Pour chaque règle
             for (Rule rule : contextFreeGrammar.getRules().values()) {
                 Set<String> set = new LinkedHashSet<>();
-                System.out.println("*** Construct First K set for: " + rule.getLeftHandSide() + " *** \n");
 
                 //Pour chaque élement de la partie droite de la règle
                 for (String x : rule.getRightHandSide()) {
                     Set<String> tempSet = firstK(contextFreeGrammar, x); //Calcul FirstK(A)
-                    System.out.println("Element encountered: " + x + " - Actual First K set of " + x + ": " + tempSet);
                     set.addAll(tempSet); //Ajout du set
                 }
 
-                System.out.println("\nSet obtained: " + set);
-                System.out.println();
                 Set<String> copySet  = Set.copyOf(firstKSets.get(rule.getLeftHandSide()));
                 firstKSets.get(rule.getLeftHandSide()).addAll(set);
-                System.out.println("First K set BEFORE for " + rule.getLeftHandSide() + " is :" + copySet);
-                System.out.println("First K set AFTER for " + rule.getLeftHandSide() + " is :" + firstKSets.get(rule.getLeftHandSide()) + "\n");
 
                 if (!atLeastOneFirstKSetHasBeenUpdated && !copySet.equals(firstKSets.get(rule.getLeftHandSide()))) {
-                    System.out.println("AT LEAST ONE FIRST K SET HAS BEEN UPDATED\n");
                     atLeastOneFirstKSetHasBeenUpdated = true;
                 }
 
@@ -142,7 +129,19 @@ public class ParseTools {
                     if (cfg.getVariables().contains(B)) {
                         List<String> beta = rightHandSide.subList(i + 1, rightHandSide.size());
                         Set<String> oldFollowKSet = new LinkedHashSet<>(followKSets.get(B));
-                        Set<String> newFollowKSet = new LinkedHashSet<>(firstK(cfg, String.join("", beta)));
+                        Set<String> newFollowKSet = new LinkedHashSet<>();
+
+                        String x = String.join("", beta);
+                        if (x.isEmpty()) {
+                            x = EPSILON;
+                            Set<String> set = new LinkedHashSet<>(firstK(cfg, x));
+                            newFollowKSet.addAll(set);
+                        } else {
+                            for (String y : beta) {
+                                Set<String> set = new LinkedHashSet<>(firstK(cfg, y));
+                                newFollowKSet.addAll(set);
+                            }
+                        }
                         newFollowKSet.addAll(followKSets.get(leftHandSide));
                         followKSets.get(B).addAll(newFollowKSet);
     
@@ -199,13 +198,11 @@ public class ParseTools {
         //Liste des règles qui apparaissent plus d'une fois
         List<List<Integer>> listRules = occurrencesRules(contextFreeGrammar);
 
-        System.out.println(listRules);
-
         for (List<Integer> sameRules : listRules) {
             Set<String> set = new LinkedHashSet<>();
             for (int ruleNumber : sameRules) {
                 String leftHandSide = contextFreeGrammar.getRules().get(ruleNumber).getLeftHandSide();
-                String rightHandSide = contextFreeGrammar.getRules().get(ruleNumber).getRightHandSide().toString();
+                String rightHandSide = String.join("", contextFreeGrammar.getRules().get(ruleNumber).getRightHandSide()).replaceAll("[,]", "");
                 String definition = rightHandSide + FOLLOW + leftHandSide;
                 Set<String> firstKset = firstK(contextFreeGrammar, definition);
                 set.retainAll(firstKset);
@@ -214,23 +211,20 @@ public class ParseTools {
                 }
             }
         }
-
+        System.out.print("This grammar is LL1");
         return true;
     }
 
 
     public int[][] constructLL1ActionTableFromCFG(ContextFreeGrammar contextFreeGrammar){
-        // Check if the grammar is LL(1)
-        if (!isGrammarLL1(contextFreeGrammar)) {
-            return null;
+
+        if (firstKSets.isEmpty() && followKSets.isEmpty()) {
+            firstKSets = constructFirstKSets(contextFreeGrammar);
+            followKSets = constructFollowKSets(contextFreeGrammar);
         }
-    
-        // Compute the First and Follow sets
-        firstKSets = constructFirstKSets(contextFreeGrammar);
-        followKSets = constructFollowKSets(contextFreeGrammar);
-    
+
         // Initialize the action table with -1
-        int[][] actionTable = new int[contextFreeGrammar.getVariables().size()][contextFreeGrammar.getTerminals().size() + 1];
+        actionTable = new int[contextFreeGrammar.getVariables().size()][contextFreeGrammar.getTerminals().size() + 1];
         for (int[] row : actionTable) {
             Arrays.fill(row, -1);
         }
@@ -238,8 +232,14 @@ public class ParseTools {
         // Fill the action table
         for (Rule rule : contextFreeGrammar.getRules().values()) {
             String leftHandSide = rule.getLeftHandSide();
-            List<String> rightHandSide = rule.getRightHandSide();
-    
+            String rightHandSide = String.join("", rule.getRightHandSide()).replaceAll("[,]", "");
+            String definition = rightHandSide + FOLLOW + leftHandSide;
+
+            for (String a : firstK(contextFreeGrammar, definition)) {
+                actionTable[contextFreeGrammar.getVariables().indexOf(leftHandSide)][contextFreeGrammar.getTerminals().indexOf(a)] = rule.getNumber();
+            }
+
+            /*
             // For each terminal a in First(A -> alpha)
             for (String a : firstK(contextFreeGrammar, String.join("", rightHandSide))) {
                 if (!a.equals(EPSILON)) {
@@ -259,8 +259,20 @@ public class ParseTools {
                     actionTable[contextFreeGrammar.getVariables().indexOf(leftHandSide)][contextFreeGrammar.getTerminals().size()] = rule.getNumber();
                 }
             }
+
+             */
         }
-    
+
+        System.out.println();
+        for (int i = 0; i < actionTable.length; i++) {
+            // Iterate through each element in the current row
+            for (int j = 0; j < actionTable[i].length; j++) {
+                System.out.print(actionTable[i][j] + " ");
+            }
+            // Move to the next line after printing each row
+            System.out.println();
+        }
+
         return actionTable;
     }
 

@@ -37,5 +37,5 @@
 [37] <Comp> → =
 [38] <Comp> → <
 [39] <While> → while <Cond> do <Instruction>
-[40] <Print> → print([VarName])
-[41] <Read> → read([VarName])
+[40] <Print> → print ( [VarName] )
+[41] <Read> → read ( [VarName] )

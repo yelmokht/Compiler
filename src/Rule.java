@@ -29,6 +29,7 @@ public class Rule {
         return "Rule{" +
                 "leftHandSide='" + leftHandSide + '\'' +
                 ", rightHandSide=" + rightHandSide +
+                ", number=" + number +
                 '}';
     }
 }

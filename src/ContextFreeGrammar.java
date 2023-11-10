@@ -45,17 +45,29 @@ public class ContextFreeGrammar {
             String rightHandSide = line.substring(line.indexOf("→") + 2);
             alphabet.add(leftHandSide);
             alphabet.addAll(Arrays.asList(rightHandSide.split(" ")));
+
             if (!variables.contains(leftHandSide)) {
                 variables.add(leftHandSide);
             }
+
+            Rule rule = new Rule(leftHandSide, new ArrayList<>(List.of(rightHandSide.split(" "))), number);
+            rules.put(number, rule);
+            startSymbol = rules.get(1).getLeftHandSide();
+        }
+
+        for (String line : lines) {
+            String rightHandSide = line.substring(line.indexOf("→") + 2);
             for (String symbol : rightHandSide.split(" ")) {
                 if (!variables.contains(symbol) && !terminals.contains(symbol)) {
                     terminals.add(symbol);
                 }
             }
-            Rule rule = new Rule(leftHandSide, new ArrayList<>(List.of(rightHandSide.split(" "))),number);
-            rules.put(number, rule);
-            startSymbol = rules.get(1).getLeftHandSide();
         }
+
+        System.out.println("Alphabet : " + alphabet);
+        System.out.println("Variables : " + variables);
+        System.out.println("Terminaux : " + terminals);
+        System.out.println("Rules : " + rules);
+        System.out.println("Start symbol : " + startSymbol);
     }
 }
