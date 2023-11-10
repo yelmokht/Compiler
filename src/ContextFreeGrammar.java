@@ -6,8 +6,8 @@ import java.util.*;
 public class ContextFreeGrammar {
     private final String filePath;
     private final Set<String> alphabet = new LinkedHashSet<>();
-    private final Set<String> variables = new LinkedHashSet<>();
-    private final Set<String> terminals = new LinkedHashSet<>();
+    private final List<String> variables = new ArrayList<>();
+    private final List<String> terminals = new ArrayList<>();
     private Map<Integer, Rule> rules = new LinkedHashMap<>();
     private String startSymbol;
 
@@ -20,11 +20,11 @@ public class ContextFreeGrammar {
         return alphabet;
     }
 
-    public Set<String> getVariables() {
+    public List<String> getVariables() {
         return variables;
     }
 
-    public Set<String> getTerminals() {
+    public List<String> getTerminals() {
         return terminals;
     }
 
@@ -45,10 +45,15 @@ public class ContextFreeGrammar {
             String rightHandSide = line.substring(line.indexOf("→") + 2);
             alphabet.add(leftHandSide);
             alphabet.addAll(Arrays.asList(rightHandSide.split(" ")));
-            variables.add(leftHandSide);
-            terminals.addAll(alphabet);
-            terminals.removeAll(variables);
-            Rule rule = new Rule(leftHandSide, new ArrayList<>(List.of(rightHandSide.split(" "))));
+            if (!variables.contains(leftHandSide)) {
+                variables.add(leftHandSide);
+            }
+            for (String symbol : rightHandSide.split(" ")) {
+                if (!variables.contains(symbol) && !terminals.contains(symbol)) {
+                    terminals.add(symbol);
+                }
+            }
+            Rule rule = new Rule(leftHandSide, new ArrayList<>(List.of(rightHandSide.split(" "))),number);
             rules.put(number, rule);
             startSymbol = rules.get(1).getLeftHandSide();
         }

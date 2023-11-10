@@ -99,18 +99,63 @@ public class ParseTools {
         }
         return firstKSets;
     }
-
-    private Set<String> followK(ContextFreeGrammar contextFreeGrammar, String x) {
-        //TODO
-        return null;
+    private Set<String> followK(ContextFreeGrammar cfg, String x) {
+        Set<String> followKSets = new LinkedHashSet<>();
+    
+        if (x.equals(cfg.getStartSymbol())) {
+            followKSets.add(EPSILON);
+        }
+    
+        for (Rule rule : cfg.getRules().values()) {
+            List<String> rightHandSide = rule.getRightHandSide();
+            for (int i = 0; i < rightHandSide.size(); i++) {
+                if (rightHandSide.get(i).equals(x) && i < rightHandSide.size() - 1) {
+                    String nextSymbol = rightHandSide.get(i + 1);
+                    followKSets.addAll(firstK(cfg, nextSymbol));
+                }
+            }
+        }
+    
+        return followKSets;
     }
 
 
     public Map<String, Set<String>> constructFollowKSets(ContextFreeGrammar cfg) {
-        //TODO
-        return null;
+        Map<String, Set<String>> followKSets = new LinkedHashMap<>();
+        String startSymbol = cfg.getStartSymbol();
+    
+        // Initialize Followk sets
+        for (String variable : cfg.getVariables()) {
+            followKSets.put(variable, new LinkedHashSet<>());
+        }
+        followKSets.get(startSymbol).add(EPSILON);
+    
+        boolean followKSetHasBeenUpdated;
+        do {
+            followKSetHasBeenUpdated = false;
+            for (Rule rule : cfg.getRules().values()) {
+                String leftHandSide = rule.getLeftHandSide();
+                List<String> rightHandSide = rule.getRightHandSide();
+    
+                for (int i = 0; i < rightHandSide.size(); i++) {
+                    String B = rightHandSide.get(i);
+                    if (cfg.getVariables().contains(B)) {
+                        List<String> beta = rightHandSide.subList(i + 1, rightHandSide.size());
+                        Set<String> oldFollowKSet = new LinkedHashSet<>(followKSets.get(B));
+                        Set<String> newFollowKSet = new LinkedHashSet<>(firstK(cfg, String.join("", beta)));
+                        newFollowKSet.addAll(followKSets.get(leftHandSide));
+                        followKSets.get(B).addAll(newFollowKSet);
+    
+                        if (!oldFollowKSet.equals(followKSets.get(B))) {
+                            followKSetHasBeenUpdated = true;
+                        }
+                    }
+                }
+            }
+        } while (followKSetHasBeenUpdated);
+    
+        return followKSets;
     }
-
     public List<List<Integer>> occurrencesRules(ContextFreeGrammar contextFreeGrammar) {
         //To simplify
         List<List<Integer>> list = new LinkedList<>();
@@ -174,10 +219,49 @@ public class ParseTools {
     }
 
 
-
     public int[][] constructLL1ActionTableFromCFG(ContextFreeGrammar contextFreeGrammar){
-        //TODO
-        return null;
+        // Check if the grammar is LL(1)
+        if (!isGrammarLL1(contextFreeGrammar)) {
+            return null;
+        }
+    
+        // Compute the First and Follow sets
+        firstKSets = constructFirstKSets(contextFreeGrammar);
+        followKSets = constructFollowKSets(contextFreeGrammar);
+    
+        // Initialize the action table with -1
+        int[][] actionTable = new int[contextFreeGrammar.getVariables().size()][contextFreeGrammar.getTerminals().size() + 1];
+        for (int[] row : actionTable) {
+            Arrays.fill(row, -1);
+        }
+    
+        // Fill the action table
+        for (Rule rule : contextFreeGrammar.getRules().values()) {
+            String leftHandSide = rule.getLeftHandSide();
+            List<String> rightHandSide = rule.getRightHandSide();
+    
+            // For each terminal a in First(A -> alpha)
+            for (String a : firstK(contextFreeGrammar, String.join("", rightHandSide))) {
+                if (!a.equals(EPSILON)) {
+                    actionTable[contextFreeGrammar.getVariables().indexOf(leftHandSide)][contextFreeGrammar.getTerminals().indexOf(a)] = rule.getNumber();
+                }
+            }
+    
+            // If epsilon is in First(A -> alpha), for each terminal b in Follow(A), add A -> alpha to M[A, b]
+            if (firstK(contextFreeGrammar, String.join("", rightHandSide)).contains(EPSILON)) {
+                for (String b : followKSets.get(leftHandSide)) {
+                    if (!b.equals(EPSILON)) {
+                        actionTable[contextFreeGrammar.getVariables().indexOf(leftHandSide)][contextFreeGrammar.getTerminals().indexOf(b)] = rule.getNumber();
+                    }
+                }
+                // If epsilon is in Follow(A), add A -> alpha to M[A, $]
+                if (followKSets.get(leftHandSide).contains(EPSILON)) {
+                    actionTable[contextFreeGrammar.getVariables().indexOf(leftHandSide)][contextFreeGrammar.getTerminals().size()] = rule.getNumber();
+                }
+            }
+        }
+    
+        return actionTable;
     }
 
 }
