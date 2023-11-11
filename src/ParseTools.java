@@ -38,24 +38,14 @@ public class ParseTools {
      * Firstk(β) ⊙k Followk(A)
      * @param cfg
      * @param k
-     * @param variable
      * @return
      */
-    private Set<String> followK(ContextFreeGrammar cfg, int k, String variable) {
+    private Set<String> followK(ContextFreeGrammar cfg, int k, String A, List<String> beta) {
         Set<String> followKSet = new LinkedHashSet<>();
 
-        if (variable.equals(cfg.getStartSymbol())) {
-            followKSet.add(EPSILON);
-        }
-
-        for (Rule rule : cfg.getRules().values()) {
-            List<String> rightHandSide = rule.getRightHandSide();
-            for (int i = 0; i < rightHandSide.size(); i++) {
-                if (rightHandSide.get(i).equals(variable) && i < rightHandSide.size() - 1) {
-                    String nextSymbol = rightHandSide.get(i + 1);
-                    followKSet.addAll(computeFirstK(cfg, k, List.of(nextSymbol)));
-                }
-            }
+        followKSet.addAll(firstK(cfg, k, beta));
+        if (followKSet.size() < k) {
+            followKSet.addAll(followKSets.get(A));
         }
 
         return followKSet;
@@ -69,12 +59,12 @@ public class ParseTools {
      * @return
      */
     private Set<String> firstKWithFollowK(ContextFreeGrammar contextFreeGrammar, int k, List<String> stringList) {
-        String firstString = stringList.getFirst();
-        String lastString = stringList.getLast();
-        if (contextFreeGrammar.getTerminals().contains(firstString) && !firstString.equals(EPSILON)) {
-            return computeFirstK(contextFreeGrammar, k, List.of(firstString));
+        String alpha = stringList.getFirst();
+        String A = stringList.getLast();
+        if (contextFreeGrammar.getTerminals().contains(alpha) && !alpha.equals(EPSILON)) {
+            return computeFirstK(contextFreeGrammar, k, List.of(alpha));
         } else {
-            return followK(contextFreeGrammar, k, lastString); //return if present in followKsets
+            return followKSets.get(A);
         }
     }
 
@@ -185,7 +175,7 @@ public class ParseTools {
                     if (contextFreeGrammar.getVariables().contains(B)) {
                         List<String> beta = rightHandSide.subList(i + 1, rightHandSide.size());
                         Set<String> oldFollowKSet = new LinkedHashSet<>(followKSets.get(B));
-                        Set<String> followKSet = beta.isEmpty() ? computeFirstK(contextFreeGrammar, k, List.of(EPSILON)) : computeFirstK(contextFreeGrammar, k, beta); // ⊙k Follow(A)?
+                        Set<String> followKSet = beta.isEmpty() ? followK(contextFreeGrammar, 1, A, List.of(EPSILON)) : followK(contextFreeGrammar, 1, A, beta); // ⊙k Follow(A)?
                         followKSets.get(B).addAll(followKSet);
                         if (!atLeastOneFollowKSetHasBeenUpdated && !oldFollowKSet.equals(followKSets.get(B))) {
                             atLeastOneFollowKSetHasBeenUpdated = true;
