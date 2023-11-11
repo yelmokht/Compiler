@@ -1,3 +1,5 @@
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 
 /**
@@ -257,41 +259,62 @@ public class ParseTools {
 
 
     /**
-     * foreach a ∈ First(αFollow(A))
+     * Construct the LL(1) action table from a context free grammar
      * @param contextFreeGrammar
      * @return
      */
     public int[][] constructLL1ActionTableFromCFG(ContextFreeGrammar contextFreeGrammar){
-
-        //Initialize actionTable
-        actionTable = new int[contextFreeGrammar.getVariables().size()][contextFreeGrammar.getTerminals().size() + 1];
+        // Initialize actionTable
+        int[][] actionTable = new int[contextFreeGrammar.getVariables().size()][contextFreeGrammar.getTerminals().size() + 1];
         for (int[] row : actionTable) {
-            Arrays.fill(row, -1);
+            Arrays.fill(row, 0);
         }
-
-        //Algo
+    
+        // Adding the 'Produce' actions
         for (Rule rule : contextFreeGrammar.getRules().values()) {
             String leftHandSide = rule.getLeftHandSide();
-            List<String> rightHandSide = new ArrayList<>(rule.getRightHandSide()); //Not reference the list but just make a copy
-            rightHandSide.addAll(List.of(FOLLOW, leftHandSide));
-
+            List<String> rightHandSide = new ArrayList<>(rule.getRightHandSide()); // Not reference the list but just make a copy
+            rightHandSide.add(FOLLOW + leftHandSide);
+    
             for (String a : computeFirstKWithFollowK(contextFreeGrammar, 1, rightHandSide)) {
-                actionTable[contextFreeGrammar.getVariables().indexOf(leftHandSide)][contextFreeGrammar.getTerminals().indexOf(a)] = rule.getNumber();
+                int ruleNumber = rule.getNumber();
+                int variableIndex = contextFreeGrammar.getVariables().indexOf(leftHandSide);
+                int terminalIndex = contextFreeGrammar.getTerminals().indexOf(a);
+                if (actionTable[variableIndex][terminalIndex] == 0) {
+                    actionTable[variableIndex][terminalIndex] = ruleNumber;
+                } else {
+                    // Conflict: a rule number is already present in the cell
+                    System.err.println("Conflict in M[" + leftHandSide + "," + a + "]: " +
+                                       "existing rule number is " + actionTable[variableIndex][terminalIndex] +
+                                       ", trying to add rule number " + ruleNumber);
+                }
             }
         }
+        try {
+            PrintWriter writer = new PrintWriter("actionTable.csv", "UTF-8");
 
-        System.out.println();
-
-        //Print Action Table
-        for (int i = 0; i < actionTable.length; i++) {
-            for (int j = 0; j < actionTable[i].length; j++) {
-                System.out.print(actionTable[i][j] + " ");
+            // Print header row with terminal symbols
+            writer.print(",");
+            for (String terminal : contextFreeGrammar.getTerminals()) {
+                writer.print(terminal + ",");
             }
-            System.out.println();
-        }
+            writer.println();
 
+            // Print each row with corresponding variable symbol
+            for (int i = 0; i < actionTable.length; i++) {
+                writer.print(contextFreeGrammar.getVariables().get(i) + "\t");
+                for (int j = 0; j < actionTable[i].length; j++) {
+                    writer.print(actionTable[i][j] + ",");
+                }
+                writer.println();
+            }
+
+            writer.close();
+            } catch (IOException e) {
+                System.out.println("An error occurred while writing to the file.");
+                e.printStackTrace();
+            }
+                
         return actionTable;
-
     }
-
 }
