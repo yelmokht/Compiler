@@ -34,8 +34,8 @@ public class Main {
 
         //If grammar is LL(1), parse the file
         if(parseTools.isGrammarLL1(contextFreeGrammar)) {
-            int[][] actionTable = parseTools.constructLL1ActionTableFromCFG(contextFreeGrammar);
-            parser.parse(contextFreeGrammar, actionTable, inputFile);
+            //int[][] actionTable = parseTools.constructLL1ActionTableFromCFG(contextFreeGrammar);
+            //parser.parse(contextFreeGrammar, actionTable, inputFile);
         } else {
             throw new IllegalArgumentException("This context free grammar cannot be LL(1). Exiting ...");
         }

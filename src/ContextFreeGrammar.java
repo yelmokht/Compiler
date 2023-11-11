@@ -63,11 +63,5 @@ public class ContextFreeGrammar {
                 }
             }
         }
-
-        System.out.println("Alphabet : " + alphabet);
-        System.out.println("Variables : " + variables);
-        System.out.println("Terminaux : " + terminals);
-        System.out.println("Rules : " + rules);
-        System.out.println("Start symbol : " + startSymbol);
     }
 }
