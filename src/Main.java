@@ -1,6 +1,4 @@
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Main class parses a given input file and generates the parse tree of the input file in LaTeX.
@@ -33,9 +31,9 @@ public class Main {
         ContextFreeGrammar contextFreeGrammar = new ContextFreeGrammar("src/resources/CFG.pmp");
 
         //If grammar is LL(1), parse the file
-        if(parseTools.isGrammarLL1(contextFreeGrammar)) {
-            //int[][] actionTable = parseTools.constructLL1ActionTableFromCFG(contextFreeGrammar);
-            //parser.parse(contextFreeGrammar, actionTable, inputFile);
+        if(parseTools.isGrammarLLK(contextFreeGrammar, 1)) {
+            int[][] actionTable = parseTools.constructLL1ActionTableFromCFG(contextFreeGrammar);
+            parser.parse(contextFreeGrammar, actionTable, inputFile);
         } else {
             throw new IllegalArgumentException("This context free grammar cannot be LL(1). Exiting ...");
         }
