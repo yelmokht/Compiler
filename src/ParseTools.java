@@ -59,8 +59,8 @@ public class ParseTools {
      * @return
      */
     private Set<String> firstKWithFollowK(ContextFreeGrammar contextFreeGrammar, int k, List<String> stringList) {
-        String alpha = stringList.getFirst();
-        String A = stringList.getLast();
+        String alpha = stringList.get(0);
+        String A = stringList.get(stringList.size() - 1);
         if (contextFreeGrammar.getTerminals().contains(alpha) && !alpha.equals(EPSILON)) {
             return computeFirstK(contextFreeGrammar, k, List.of(alpha));
         } else {
@@ -93,9 +93,10 @@ public class ParseTools {
      * @return
      */
     private Set<String> computeFirstKWithFollowK(ContextFreeGrammar contextFreeGrammar, int k, List<String> stringList) {
-        String firstString = stringList.getFirst();
-        String lastString = stringList.getLast();
-        if (contextFreeGrammar.getTerminals().contains(firstString) && !firstString.equals(EPSILON)) {
+        String firstString = stringList.get(0);
+        String lastString = stringList.get(stringList.size() - 1);
+        if ((contextFreeGrammar.getTerminals().contains(firstString) || (contextFreeGrammar.getVariables().contains(firstString) )&& !firstString.equals(EPSILON))) {
+            
             return firstKSets.get(firstString);
         } else {
             return followKSets.get(lastString);
@@ -174,10 +175,10 @@ public class ParseTools {
                     String B = rightHandSide.get(i);
                     if (contextFreeGrammar.getVariables().contains(B)) {
                         List<String> beta = rightHandSide.subList(i + 1, rightHandSide.size());
-                        Set<String> oldFollowKSet = new LinkedHashSet<>(followKSets.get(B));
+                        Set<String> oldFollowKSet = new LinkedHashSet<>(followKSets.get(A));
                         Set<String> followKSet = beta.isEmpty() ? followK(contextFreeGrammar, 1, A, List.of(EPSILON)) : followK(contextFreeGrammar, 1, A, beta); // ⊙k Follow(A)?
                         followKSets.get(B).addAll(followKSet);
-                        if (!atLeastOneFollowKSetHasBeenUpdated && !oldFollowKSet.equals(followKSets.get(B))) {
+                        if (!atLeastOneFollowKSetHasBeenUpdated && !oldFollowKSet.equals(followKSets.get(A))) {
                             atLeastOneFollowKSetHasBeenUpdated = true;
                         }
                     }
