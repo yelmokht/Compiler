@@ -1,5 +1,7 @@
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -44,12 +46,10 @@ public class ParseTools {
      */
     private Set<String> followK(ContextFreeGrammar cfg, int k, String A, List<String> beta) {
         Set<String> followKSet = new LinkedHashSet<>();
-
         followKSet.addAll(firstK(cfg, k, beta));
         if (followKSet.size() < k) {
             followKSet.addAll(followKSets.get(A));
         }
-
         return followKSet;
     }
 
@@ -224,12 +224,7 @@ public class ParseTools {
         firstKSets = constructFirstKSets(contextFreeGrammar, k);
         followKSets = constructFollowKSets(contextFreeGrammar, k);
 
-        System.out.println("First " + k + " sets : " + firstKSets);
-        System.out.println("Follow " + k + " sets : " + followKSets);
-        System.out.println("Rules : " + contextFreeGrammar.getRules());
-
         for (List<Integer> sameRules : occurrencesRules(contextFreeGrammar)) {
-            System.out.println("We check for rules : " + sameRules);
             Rule firstRule = contextFreeGrammar.getRules().get(sameRules.get(0));
             String leftHandSide = firstRule.getLeftHandSide();
             List<String> rightHandSide = new ArrayList<>(firstRule.getRightHandSide()); //Not reference the list but just make a copy
@@ -242,79 +237,88 @@ public class ParseTools {
                 List<String> rhs = new ArrayList<>(rule.getRightHandSide()); //Not reference but copy
                 rhs.addAll(List.of(FOLLOW, lhs));
                 Set<String> ruleFirstKSet = computeFirstKWithFollowK(contextFreeGrammar, k, rhs); //Have to look up in table
-                System.out.println("[" + ruleNumber + "] First("  + rhs + ") = " + ruleFirstKSet);
                 intersectionSet.retainAll(ruleFirstKSet);
             }
 
-            System.out.println("Resulting set : " + intersectionSet + "\n");
             if (!intersectionSet.isEmpty()) {
                 System.err.println("\nConflict in rules : " + sameRules + "\nResulting set : " + intersectionSet + "\nMust be : []");
-                //return false;
+                return false;
             }
         }
 
-        //System.out.println("This context free grammar is LL(1)");
+        System.out.println("This context free grammar is LL(1)");
         return true;
     }
 
-
     /**
-     * Construct the LL(1) action table from a context free grammar
+     *
      * @param contextFreeGrammar
-     * @return
      */
-    public int[][] constructLL1ActionTableFromCFG(ContextFreeGrammar contextFreeGrammar){
-        // Initialize actionTable
-        int[][] actionTable = new int[contextFreeGrammar.getVariables().size()][contextFreeGrammar.getTerminals().size() + 1];
+    private void initializeActionTable(ContextFreeGrammar contextFreeGrammar) {
+        actionTable = new int[contextFreeGrammar.getVariables().size()][contextFreeGrammar.getTerminals().size()];
         for (int[] row : actionTable) {
             Arrays.fill(row, 0);
         }
-    
-        // Adding the 'Produce' actions
+    }
+
+    private void addProduceActions(ContextFreeGrammar contextFreeGrammar) {
         for (Rule rule : contextFreeGrammar.getRules().values()) {
-            String leftHandSide = rule.getLeftHandSide();
-            List<String> rightHandSide = new ArrayList<>(rule.getRightHandSide()); // Not reference the list but just make a copy
-            rightHandSide.add(FOLLOW + leftHandSide);
-    
-            for (String a : computeFirstKWithFollowK(contextFreeGrammar, 1, rightHandSide)) {
+            String A = rule.getLeftHandSide();
+            List<String> alpha = new ArrayList<>(rule.getRightHandSide());
+            alpha.add(FOLLOW + A);
+            for (String a : computeFirstKWithFollowK(contextFreeGrammar, 1, alpha)) {
                 int ruleNumber = rule.getNumber();
-                int variableIndex = contextFreeGrammar.getVariables().indexOf(leftHandSide);
+                int variableIndex = contextFreeGrammar.getVariables().indexOf(A);
                 int terminalIndex = contextFreeGrammar.getTerminals().indexOf(a);
                 if (actionTable[variableIndex][terminalIndex] == 0) {
                     actionTable[variableIndex][terminalIndex] = ruleNumber;
                 } else {
-                    // Conflict: a rule number is already present in the cell
-                    System.err.println("Conflict in M[" + leftHandSide + "," + a + "]: " +
-                                       "existing rule number is " + actionTable[variableIndex][terminalIndex] +
-                                       ", trying to add rule number " + ruleNumber);
+                    System.err.println("Conflict in M[" + A + "," + a + "]: " + "existing rule number is " + actionTable[variableIndex][terminalIndex] + ", trying to add rule number " + ruleNumber);
                 }
             }
         }
-        try {
-            PrintWriter writer = new PrintWriter("actionTable.csv", "UTF-8");
+    }
 
-            // Print header row with terminal symbols
-            writer.print(",");
+    public void printActionTable(ContextFreeGrammar contextFreeGrammar) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("actionTable.txt"))) {
+            int maxVariablesLength = contextFreeGrammar.getVariables().stream().map(String::length).max(Integer::compare).orElse(0);
+            int maxTerminalsLength = contextFreeGrammar.getTerminals().stream().map(String::length).max(Integer::compare).orElse(0);
+            int firstPadding = maxVariablesLength + 7;
+            int inBetweenColumnsPadding = maxTerminalsLength + 2;
+
+            // Headers
+            writer.printf("%-" + firstPadding + "s", "");
             for (String terminal : contextFreeGrammar.getTerminals()) {
-                writer.print(terminal + ",");
+                writer.printf("%-" + inBetweenColumnsPadding + "s", terminal);
             }
             writer.println();
 
-            // Print each row with corresponding variable symbol
+            // Table
             for (int i = 0; i < actionTable.length; i++) {
-                writer.print(contextFreeGrammar.getVariables().get(i) + "\t");
-                for (int j = 0; j < actionTable[i].length; j++) {
-                    writer.print(actionTable[i][j] + ",");
+                String ruleName = contextFreeGrammar.getRules().get(i + 1).getLeftHandSide();
+                writer.printf("%-" + firstPadding + "s", ruleName);
+                for (int j = 0; j < actionTable[0].length; j++) {
+                    writer.printf("%-" + inBetweenColumnsPadding + "s", actionTable[i][j]);
                 }
                 writer.println();
             }
+            System.out.println("Table exported to: actionTable.txt");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-            writer.close();
-            } catch (IOException e) {
-                System.out.println("An error occurred while writing to the file.");
-                e.printStackTrace();
-            }
-                
+
+        /**
+     * Construct the LL(1) action table from a context free grammar
+     * @param contextFreeGrammar The context-free grammar
+     * @return The action table
+     */
+    public int[][] constructLL1ActionTableFromCFG(ContextFreeGrammar contextFreeGrammar){
+        initializeActionTable(contextFreeGrammar);
+        addProduceActions(contextFreeGrammar);
+        printActionTable(contextFreeGrammar);
         return actionTable;
     }
+
 }
