@@ -120,6 +120,17 @@ public class ParseTools {
         }
     }
 
+    private void printFirstKSets() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("src/resources/firstKSets.txt"))) {
+            for (String variable : firstKSets.keySet()) {
+                writer.println("Firstk(" + variable + ") = " + firstKSets.get(variable));
+            }
+            System.out.println("Content written to file successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Computes the First sets using First sets algorithm
      * foreach A → X1 X2 ... Xn ∈ P do :
@@ -143,6 +154,7 @@ public class ParseTools {
                 }
             }
         } while (atLeastOneFirstKSetHasBeenUpdated);
+        printFirstKSets();
         return firstKSets;
     }
 
@@ -158,6 +170,17 @@ public class ParseTools {
             followKSets.put(variable, new LinkedHashSet<>());
         }
         followKSets.get(contextFreeGrammar.getStartSymbol()).add(EPSILON);
+    }
+
+    private void printFollowKSets() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("src/resources/followKSets.txt"))) {
+            for (String variable : followKSets.keySet()) {
+                writer.println("Followk(" + variable + ") = " + followKSets.get(variable));
+            }
+            System.out.println("Content written to file successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -190,6 +213,7 @@ public class ParseTools {
                 }
             }
         } while (atLeastOneFollowKSetHasBeenUpdated);
+        printFollowKSets();
         return followKSets;
     }
 
@@ -296,7 +320,7 @@ public class ParseTools {
      * @param contextFreeGrammar The context-free grammar
      */
     private void printActionTable(ContextFreeGrammar contextFreeGrammar) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter("actionTable.txt"))) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("src/resources/actionTable.txt"))) {
             int maxVariablesLength = contextFreeGrammar.getVariables().stream().map(String::length).max(Integer::compare).orElse(0);
             int maxTerminalsLength = contextFreeGrammar.getTerminals().stream().map(String::length).max(Integer::compare).orElse(0);
             int firstPadding = maxVariablesLength + 7;
@@ -318,7 +342,7 @@ public class ParseTools {
                 }
                 writer.println();
             }
-            System.out.println("Table exported to: actionTable.txt");
+            System.out.println("Table exported to: src/resources/actionTable.txt");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
