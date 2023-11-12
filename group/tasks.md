@@ -1,9 +1,7 @@
 # Tasks
 
-first sets
-follow sets
-isGrammarLL1
-constructActionTable 
+parse algorithm (Younes)
+ParseTree (Ismail)
 
-10/11 18h
+15/11 18h
 

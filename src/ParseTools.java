@@ -1,28 +1,26 @@
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
  * ParseTools class contains all the tools related to grammars.
  */
 public class ParseTools {
+    public static final String EPSILON = "ε";
+    public static final String FOLLOW = "Follow";
     private Map<String, Set<String>> firstKSets = new LinkedHashMap<>();
     private Map<String, Set<String>> followKSets = new LinkedHashMap<>();
     private int[][] actionTable;
-    public static final String EPSILON = "ε";
-    public static final String FOLLOW = "Follow";
-
 
     public ParseTools(){}
 
     /**
-     * Firstk(X) = Firstk (X1) ⊙k Firstk (X2) ⊙k · · · ⊙k Firstk (Xn)
-     * @param contextFreeGrammar
-     * @param k
-     * @param stringList
-     * @return
+     * Computes Firstk(X) = Firstk(X1) ⊙k Firstk(X2) ⊙k ... ⊙k Firstk(Xn)
+     * @param contextFreeGrammar The context-free grammar
+     * @param k The parameter k
+     * @param stringList The list of strings
+     * @return First(X) set
      */
     private Set<String> firstK(ContextFreeGrammar contextFreeGrammar, int k, List<String> stringList) {
         Set<String> firstKSet = new LinkedHashSet<>();
@@ -39,14 +37,15 @@ public class ParseTools {
     }
 
     /**
-     * Firstk(β) ⊙k Followk(A)
-     * @param cfg
-     * @param k
-     * @return
+     * Computes Followk(X) = Firstk(beta) ⊙k Followk(A)
+     * @param contextFreeGrammar The context-free grammar
+     * @param k The parameter k
+     * @param A The variable
+     * @param beta The list of strings
+     * @return Followk(X) set
      */
-    private Set<String> followK(ContextFreeGrammar cfg, int k, String A, List<String> beta) {
-        Set<String> followKSet = new LinkedHashSet<>();
-        followKSet.addAll(firstK(cfg, k, beta));
+    private Set<String> followK(ContextFreeGrammar contextFreeGrammar, int k, String A, List<String> beta) {
+        Set<String> followKSet = new LinkedHashSet<>(firstK(contextFreeGrammar, k, beta));
         if (followKSet.size() < k) {
             followKSet.addAll(followKSets.get(A));
         }
@@ -54,11 +53,11 @@ public class ParseTools {
     }
 
     /**
-     * Firstk(αFollowk(A))
-     * @param contextFreeGrammar
-     * @param k
-     * @param stringList
-     * @return
+     * Computes Firstk(αFollowk(A))
+     * @param contextFreeGrammar The context-free grammar
+     * @param k The parameter k
+     * @param stringList The list of strings
+     * @return Firstk(X) set
      */
     private Set<String> firstKWithFollowK(ContextFreeGrammar contextFreeGrammar, int k, List<String> stringList) {
         String alpha = stringList.get(0);
@@ -71,11 +70,11 @@ public class ParseTools {
     }
 
     /**
-     * Firstk(X) avec X = X1X2X3...Xn ou αFollowk(A) et on calcule
-     * @param contextFreeGrammar
-     * @param k
-     * @param stringList
-     * @return
+     * Firstk(X) with X = X1X2X3...Xn or αFollowk(A)
+     * @param contextFreeGrammar The context-free grammar
+     * @param k The parameter k
+     * @param stringList The list of strings
+     * @return Firstk(X) set
      */
     private Set<String> computeFirstK(ContextFreeGrammar contextFreeGrammar, int k, List<String> stringList) {
         Set<String> firstKSet;
@@ -88,17 +87,16 @@ public class ParseTools {
     }
 
     /**
-     * Firstk(X) avec X = X1X2X3...Xn ou αFollowk(A) et on reprend les valeurs des différents sets
-     * @param contextFreeGrammar
-     * @param k
-     * @param stringList
-     * @return
+     * Computes Firstk(alphaFollowk(A))
+     * @param contextFreeGrammar The context-free grammar
+     * @param k The parameter k
+     * @param stringList The list of strings
+     * @return Firstk(alphaFollowk(A)) set
      */
     private Set<String> computeFirstKWithFollowK(ContextFreeGrammar contextFreeGrammar, int k, List<String> stringList) {
         String firstString = stringList.get(0);
         String lastString = stringList.get(stringList.size() - 1);
         if ((contextFreeGrammar.getTerminals().contains(firstString) || (contextFreeGrammar.getVariables().contains(firstString) )&& !firstString.equals(EPSILON))) {
-            
             return firstKSets.get(firstString);
         } else {
             return followKSets.get(lastString);
@@ -106,8 +104,10 @@ public class ParseTools {
     }
 
     /**
-     * foreach a ∈ T do Firstk (a) ← {a} ; foreach A ∈ V do Firstk (A) ← {};
-     * @param contextFreeGrammar
+     * Initializes the First sets according to First sets algorithm
+     * foreach a ∈ T do Firstk (a) ← {a}
+     * foreach A ∈ V do Firstk (A) ← {}
+     * @param contextFreeGrammar The context-free grammar
      */
     private void initializeFirstKSets(ContextFreeGrammar contextFreeGrammar) {
         for (String terminal : contextFreeGrammar.getTerminals()) {
@@ -121,33 +121,21 @@ public class ParseTools {
     }
 
     /**
-     * foreach A ∈ V \ {S} do
-     * Followk(A) ← {}
-     * Followk(S) ← {ε}
-     * @param cfg
+     * Computes the First sets using First sets algorithm
+     * foreach A → X1 X2 ... Xn ∈ P do :
+     * Firstk(A) ← Firstk(A) ∪ (Firstk(X1) ⊙k Firstk(X2) ⊙k ... ⊙k Firstk(Xn))
+     * @param contextFreeGrammar The context-free grammar
+     * @param k The parameter k in Firstk
+     * @return The First sets
      */
-    private void initializeFollowKSets(ContextFreeGrammar cfg) {
-        for (String variable : cfg.getVariables()) {
-            followKSets.put(variable, new LinkedHashSet<>());
-        }
-        followKSets.get(cfg.getStartSymbol()).add(EPSILON);
-    }
-
-    /**
-     * foreach A → X1 X2 · · · Xn ∈ P do
-     * Firstk (A) ← Firstk (A) ∪ (Firstk(X1) ⊙k Firstk(X2) ⊙k ... ⊙k Firstk(Xn))
-     * @param contextFreeGrammar
-     * @param k
-     * @return
-     */
-    public Map<String, Set<String>> constructFirstKSets(ContextFreeGrammar contextFreeGrammar, int k) {
+    private Map<String, Set<String>> constructFirstKSets(ContextFreeGrammar contextFreeGrammar, int k) {
         initializeFirstKSets(contextFreeGrammar);
         boolean atLeastOneFirstKSetHasBeenUpdated;
         do {
             atLeastOneFirstKSetHasBeenUpdated = false;
             for (Rule rule : contextFreeGrammar.getRules().values()) {
                 String A = rule.getLeftHandSide();
-                Set<String> oldFollowKSet  = Set.copyOf(firstKSets.get(rule.getLeftHandSide()));
+                Set<String> oldFollowKSet  = new LinkedHashSet<>(firstKSets.get(A));
                 Set<String> firstKSet = computeFirstK(contextFreeGrammar, k, rule.getRightHandSide());
                 firstKSets.get(A).addAll(firstKSet);
                 if (!atLeastOneFirstKSetHasBeenUpdated && !oldFollowKSet.equals(firstKSets.get(rule.getLeftHandSide()))) {
@@ -159,13 +147,28 @@ public class ParseTools {
     }
 
     /**
-     * foreach A → αBβ ∈ P do
-     * Followk (B) ← Followk (B) ∪ (Firstk(β) ⊙k Followk(A))
-     * @param contextFreeGrammar
-     * @param k
-     * @return
+     * Initializes the Follow sets according to Follow sets algorithm
+     * foreach A ∈ V \ {S} do :
+     * Followk(A) ← {}
+     * Followk(S) ← {ε}
+     * @param contextFreeGrammar The context-free grammar
      */
-    public Map<String, Set<String>> constructFollowKSets(ContextFreeGrammar contextFreeGrammar, int k) {
+    private void initializeFollowKSets(ContextFreeGrammar contextFreeGrammar) {
+        for (String variable : contextFreeGrammar.getVariables()) {
+            followKSets.put(variable, new LinkedHashSet<>());
+        }
+        followKSets.get(contextFreeGrammar.getStartSymbol()).add(EPSILON);
+    }
+
+    /**
+     * Computes the Follow sets using Follow sets algorithm
+     * foreach A → αBβ ∈ P do :
+     * Followk(B) ← Followk(B) ∪ (Firstk(β) ⊙k Followk(A))
+     * @param contextFreeGrammar The context-free grammar
+     * @param k The parameter k in Followk
+     * @return The Follow sets
+     */
+    private Map<String, Set<String>> constructFollowKSets(ContextFreeGrammar contextFreeGrammar, int k) {
         initializeFollowKSets(contextFreeGrammar);
         boolean atLeastOneFollowKSetHasBeenUpdated;
         do {
@@ -178,7 +181,7 @@ public class ParseTools {
                     if (contextFreeGrammar.getVariables().contains(B)) {
                         List<String> beta = rightHandSide.subList(i + 1, rightHandSide.size());
                         Set<String> oldFollowKSet = new LinkedHashSet<>(followKSets.get(A));
-                        Set<String> followKSet = beta.isEmpty() ? followK(contextFreeGrammar, 1, A, List.of(EPSILON)) : followK(contextFreeGrammar, 1, A, beta); // ⊙k Follow(A)?
+                        Set<String> followKSet = beta.isEmpty() ? followK(contextFreeGrammar, k, A, List.of(EPSILON)) : followK(contextFreeGrammar, k, A, beta);
                         followKSets.get(B).addAll(followKSet);
                         if (!atLeastOneFollowKSetHasBeenUpdated && !oldFollowKSet.equals(followKSets.get(A))) {
                             atLeastOneFollowKSetHasBeenUpdated = true;
@@ -190,8 +193,12 @@ public class ParseTools {
         return followKSets;
     }
 
-    //OK
-    public List<List<Integer>> occurrencesRules(ContextFreeGrammar contextFreeGrammar) {
+    /**
+     * Computes the rules with same left hand side in the context-free grammar
+     * @param contextFreeGrammar The context-free grammar
+     * @return The list of rules with same left hand side
+     */
+    private List<List<Integer>> occurrencesRules(ContextFreeGrammar contextFreeGrammar) {
         List<List<Integer>> list = new LinkedList<>();
         Map<Integer, Rule> rules = contextFreeGrammar.getRules();
         Set<Integer> processedRules = new HashSet<>();
@@ -215,10 +222,11 @@ public class ParseTools {
     }
 
     /**
-     * Firstk(α1Followk(A)) ∩ Firstk(α2Followk(A)) = {}
-     * @param contextFreeGrammar
-     * @param k
-     * @return
+     * Checks that the grammar is LL(k) using the definition of Strong LL(K) :
+     * FirstK(alphaFollowK(A)) for all pairs of rules A -> alpha
+     * @param contextFreeGrammar The context-free grammar
+     * @param k The parameter k in LL(k)
+     * @return true if this grammar is LL(k)
      */
     public boolean isGrammarLLK(ContextFreeGrammar contextFreeGrammar, int k) {
         firstKSets = constructFirstKSets(contextFreeGrammar, k);
@@ -227,16 +235,16 @@ public class ParseTools {
         for (List<Integer> sameRules : occurrencesRules(contextFreeGrammar)) {
             Rule firstRule = contextFreeGrammar.getRules().get(sameRules.get(0));
             String leftHandSide = firstRule.getLeftHandSide();
-            List<String> rightHandSide = new ArrayList<>(firstRule.getRightHandSide()); //Not reference the list but just make a copy
+            List<String> rightHandSide = new ArrayList<>(firstRule.getRightHandSide());
             rightHandSide.addAll(List.of(FOLLOW, leftHandSide));
-            Set<String> intersectionSet = new LinkedHashSet<>(computeFirstKWithFollowK(contextFreeGrammar, k, rightHandSide)); //Have to look up in table
+            Set<String> intersectionSet = new LinkedHashSet<>(computeFirstKWithFollowK(contextFreeGrammar, k, rightHandSide));
 
             for (int ruleNumber : sameRules) {
                 Rule rule = contextFreeGrammar.getRules().get(ruleNumber);
-                String lhs = rule.getLeftHandSide();
-                List<String> rhs = new ArrayList<>(rule.getRightHandSide()); //Not reference but copy
-                rhs.addAll(List.of(FOLLOW, lhs));
-                Set<String> ruleFirstKSet = computeFirstKWithFollowK(contextFreeGrammar, k, rhs); //Have to look up in table
+                String A = rule.getLeftHandSide();
+                List<String> alpha = new ArrayList<>(rule.getRightHandSide());
+                alpha.addAll(List.of(FOLLOW, A));
+                Set<String> ruleFirstKSet = computeFirstKWithFollowK(contextFreeGrammar, k, alpha);
                 intersectionSet.retainAll(ruleFirstKSet);
             }
 
@@ -246,13 +254,13 @@ public class ParseTools {
             }
         }
 
-        System.out.println("This context free grammar is LL(1)");
+        System.out.println("This context free grammar is LL(" + k + ")");
         return true;
     }
 
     /**
-     *
-     * @param contextFreeGrammar
+     * Initializes the action table
+     * @param contextFreeGrammar The context-free grammar
      */
     private void initializeActionTable(ContextFreeGrammar contextFreeGrammar) {
         actionTable = new int[contextFreeGrammar.getVariables().size()][contextFreeGrammar.getTerminals().size()];
@@ -261,6 +269,10 @@ public class ParseTools {
         }
     }
 
+    /**
+     * Adds the ´Produce´actions in the action table
+     * @param contextFreeGrammar The context-free grammar
+     */
     private void addProduceActions(ContextFreeGrammar contextFreeGrammar) {
         for (Rule rule : contextFreeGrammar.getRules().values()) {
             String A = rule.getLeftHandSide();
@@ -279,7 +291,11 @@ public class ParseTools {
         }
     }
 
-    public void printActionTable(ContextFreeGrammar contextFreeGrammar) {
+    /**
+     * Prints the LL(1) action table on the standard output
+     * @param contextFreeGrammar The context-free grammar
+     */
+    private void printActionTable(ContextFreeGrammar contextFreeGrammar) {
         try (PrintWriter writer = new PrintWriter(new FileWriter("actionTable.txt"))) {
             int maxVariablesLength = contextFreeGrammar.getVariables().stream().map(String::length).max(Integer::compare).orElse(0);
             int maxTerminalsLength = contextFreeGrammar.getTerminals().stream().map(String::length).max(Integer::compare).orElse(0);
@@ -309,8 +325,8 @@ public class ParseTools {
     }
 
 
-        /**
-     * Construct the LL(1) action table from a context free grammar
+    /**
+     * Constructs the LL(1) action table from a context free grammar
      * @param contextFreeGrammar The context-free grammar
      * @return The action table
      */
