@@ -11,7 +11,7 @@ public class ParseTools {
     public static final String FOLLOW = "Follow";
     private Map<String, Set<String>> firstKSets = new LinkedHashMap<>();
     private Map<String, Set<String>> followKSets = new LinkedHashMap<>();
-    private int[][] actionTable;
+    private String[][] actionTable;
 
     public ParseTools(){}
 
@@ -287,10 +287,25 @@ public class ParseTools {
      * @param contextFreeGrammar The context-free grammar
      */
     private void initializeActionTable(ContextFreeGrammar contextFreeGrammar) {
-        actionTable = new int[contextFreeGrammar.getVariables().size()][contextFreeGrammar.getTerminals().size()];
-        for (int[] row : actionTable) {
-            Arrays.fill(row, 0);
+        List<String> T = contextFreeGrammar.getTerminals();
+        List<String> V = contextFreeGrammar.getVariables();
+        List<String> VAndT = contextFreeGrammar.getVariablesAndTerminals();
+
+        actionTable = new String[VAndT.size()][T.size()];
+
+        for (String a : T) {
+            for (String A : V) {
+                actionTable[VAndT.indexOf(A)][T.indexOf(a)] = "0";
+            }
+
+            for (String b : T) {
+                actionTable[VAndT.indexOf(b)][T.indexOf(a)] = "0";
+            }
+
+            actionTable[VAndT.indexOf(a)][T.indexOf(a)] = "M";
         }
+
+        actionTable[VAndT.indexOf(T.get(0))][T.indexOf(T.get(0))] = "A";
     }
 
     /**
@@ -298,18 +313,22 @@ public class ParseTools {
      * @param contextFreeGrammar The context-free grammar
      */
     private void addProduceActions(ContextFreeGrammar contextFreeGrammar) {
-        for (Rule rule : contextFreeGrammar.getRules().values()) {
+        Collection<Rule> P = contextFreeGrammar.getRules().values();
+        List<String> T = contextFreeGrammar.getTerminals();
+        List<String> VAndT = contextFreeGrammar.getVariablesAndTerminals();
+
+        for (Rule rule : P) {
             String A = rule.getLeftHandSide();
             List<String> alpha = new ArrayList<>(rule.getRightHandSide());
             alpha.add(FOLLOW + A);
+
             for (String a : computeFirstKWithFollowK(contextFreeGrammar, 1, alpha)) {
-                int ruleNumber = rule.getNumber();
-                int variableIndex = contextFreeGrammar.getVariables().indexOf(A);
-                int terminalIndex = contextFreeGrammar.getTerminals().indexOf(a);
-                if (actionTable[variableIndex][terminalIndex] == 0) {
-                    actionTable[variableIndex][terminalIndex] = ruleNumber;
+                int i = rule.getNumber();
+
+                if (actionTable[VAndT.indexOf(A)][T.indexOf(a)].equals("0")) {
+                    actionTable[VAndT.indexOf(A)][T.indexOf(a)] = String.valueOf(i);
                 } else {
-                    System.err.println("Conflict in M[" + A + "," + a + "]: " + "existing rule number is " + actionTable[variableIndex][terminalIndex] + ", trying to add rule number " + ruleNumber);
+                    System.err.println("Conflict in M[" + A + "," + a + "]: " + "existing rule number is " + actionTable[VAndT.indexOf(A)][T.indexOf(a)] + ", trying to add rule number " + i);
                 }
             }
         }
@@ -321,9 +340,9 @@ public class ParseTools {
      */
     private void printActionTable(ContextFreeGrammar contextFreeGrammar) {
         try (PrintWriter writer = new PrintWriter(new FileWriter("src/resources/actionTable.txt"))) {
-            int maxVariablesLength = contextFreeGrammar.getVariables().stream().map(String::length).max(Integer::compare).orElse(0);
+            int maxAlphabetLength = contextFreeGrammar.getVariablesAndTerminals().stream().map(String::length).max(Integer::compare).orElse(0);
             int maxTerminalsLength = contextFreeGrammar.getTerminals().stream().map(String::length).max(Integer::compare).orElse(0);
-            int firstPadding = maxVariablesLength + 7;
+            int firstPadding = maxAlphabetLength + 7;
             int inBetweenColumnsPadding = maxTerminalsLength + 2;
 
             // Headers
@@ -335,8 +354,14 @@ public class ParseTools {
 
             // Table
             for (int i = 0; i < actionTable.length; i++) {
-                String ruleName = contextFreeGrammar.getRules().get(i + 1).getLeftHandSide();
-                writer.printf("%-" + firstPadding + "s", ruleName);
+                if (i < contextFreeGrammar.getVariables().size()) {
+                    String variable = contextFreeGrammar.getVariables().get(i);
+                    writer.printf("%-" + firstPadding + "s", variable);
+                }
+                else if (i - contextFreeGrammar.getVariables().size() < contextFreeGrammar.getTerminals().size()) {
+                    String terminal = contextFreeGrammar.getTerminals().get(i - contextFreeGrammar.getVariables().size());
+                    writer.printf("%-" + firstPadding + "s", terminal);
+                }
                 for (int j = 0; j < actionTable[0].length; j++) {
                     writer.printf("%-" + inBetweenColumnsPadding + "s", actionTable[i][j]);
                 }
@@ -354,7 +379,7 @@ public class ParseTools {
      * @param contextFreeGrammar The context-free grammar
      * @return The action table
      */
-    public int[][] constructLL1ActionTableFromCFG(ContextFreeGrammar contextFreeGrammar){
+    public String[][] constructLL1ActionTableFromCFG(ContextFreeGrammar contextFreeGrammar){
         initializeActionTable(contextFreeGrammar);
         addProduceActions(contextFreeGrammar);
         printActionTable(contextFreeGrammar);

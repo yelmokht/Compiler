@@ -1,4 +1,7 @@
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Main class parses a given input file and generates the parse tree of the input file in LaTeX.
@@ -32,8 +35,17 @@ public class Main {
 
         //If grammar is LL(1), parse the file
         if(parseTools.isGrammarLLK(contextFreeGrammar, 1)) {
-            int[][] actionTable = parseTools.constructLL1ActionTableFromCFG(contextFreeGrammar);
-            parser.parse(contextFreeGrammar, actionTable, inputFile);
+            String[][] actionTable = parseTools.constructLL1ActionTableFromCFG(contextFreeGrammar);
+            FileReader fileReader = new FileReader(inputFile);
+            LexicalAnalyzer lexicalAnalyzer = new LexicalAnalyzer(fileReader);
+            List<String> inputWord = new LinkedList<>();
+            while (!lexicalAnalyzer.yyatEOF()) {
+                String word = String.valueOf(lexicalAnalyzer.nextToken().getValue());
+                if (!word.equals("null")) {
+                    inputWord.add(word);
+                }
+            }
+            parser.parse(contextFreeGrammar, actionTable, inputWord);
         } else {
             throw new IllegalArgumentException("This context free grammar cannot be LL(1). Exiting ...");
         }

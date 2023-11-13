@@ -8,6 +8,7 @@ public class ContextFreeGrammar {
     private final Set<String> alphabet = new LinkedHashSet<>();
     private final List<String> variables = new ArrayList<>();
     private final List<String> terminals = new ArrayList<>();
+    private final List<String> variablesAndTerminals = new ArrayList<>();
     private Map<Integer, Rule> rules = new LinkedHashMap<>();
     private String startSymbol;
 
@@ -28,6 +29,10 @@ public class ContextFreeGrammar {
         return terminals;
     }
 
+    public List<String> getVariablesAndTerminals() {
+        return variablesAndTerminals;
+    }
+
     public Map<Integer, Rule> getRules() {
         return rules;
     }
@@ -35,6 +40,24 @@ public class ContextFreeGrammar {
     public String getStartSymbol() {
         return startSymbol;
     }
+
+    public boolean isVariable(String variable) {
+        return variables.contains(variable);
+    }
+
+    public boolean isTerminal(String terminal) {
+        return terminals.contains(terminal);
+    }
+
+    public boolean isRule(String action) {
+        try {
+            int ruleNumber = Integer.parseInt(action);
+            return rules.containsKey(ruleNumber);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
 
     public void setupGrammar(String file) throws IOException {
         List<String> lines = Files.readAllLines(Paths.get(file));
@@ -63,5 +86,7 @@ public class ContextFreeGrammar {
                 }
             }
         }
+        variablesAndTerminals.addAll(variables);
+        variablesAndTerminals.addAll(terminals);
     }
 }
