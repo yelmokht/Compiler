@@ -51,8 +51,8 @@ public class Parser {
             if (contextFreeGrammar.isRule(actionTable[row][column])) {
                 int ruleNumber = Integer.parseInt(actionTable[row][column]);
                 List<String> alpha = contextFreeGrammar.getRules().get(ruleNumber).getRightHandSide();
-                stack.pop();
                 System.out.println("BEFORE STACK : " + stack);
+                stack.pop();
 
                 // Push(alpha)
                 for (String string : alpha.reversed()) {

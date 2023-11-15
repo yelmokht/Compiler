@@ -40,7 +40,17 @@ public class Main {
             LexicalAnalyzer lexicalAnalyzer = new LexicalAnalyzer(fileReader);
             List<String> inputWord = new LinkedList<>();
             while (!lexicalAnalyzer.yyatEOF()) {
-                String word = String.valueOf(lexicalAnalyzer.nextToken().getValue());
+                Symbol symbol = lexicalAnalyzer.nextToken();
+                String word = String.valueOf(symbol.getValue());
+
+                if (symbol.getType() == LexicalUnit.VARNAME) {
+                    word = "[Varname]";
+                }
+
+                if (symbol.getType() == LexicalUnit.NUMBER) {
+                    word = "[Number]";
+                }
+
                 if (!word.equals("null")) {
                     inputWord.add(word);
                 }

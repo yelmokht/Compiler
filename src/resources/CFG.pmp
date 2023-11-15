@@ -23,8 +23,8 @@
 [23] <Term> → ( <Term> )
 [24] <Term> → [VarName]
 [25] <Term> → [Number]
-[26] <If> → if <Cond> then <Instruction> <If'>
-[27] <If'> → else <Instruction>
+[26] <If> → if <Cond> then <Instruction> else <If'>
+[27] <If'> → <Instruction>
 [28] <If'> → ε
 [29] <Cond> → <CondConj> <Cond'>
 [30] <Cond> → { <Cond> }

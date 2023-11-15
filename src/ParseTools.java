@@ -305,7 +305,7 @@ public class ParseTools {
             actionTable[VAndT.indexOf(a)][T.indexOf(a)] = "M";
         }
 
-        actionTable[VAndT.indexOf(T.get(0))][T.indexOf(T.get(0))] = "A";
+        actionTable[VAndT.indexOf(T.get(1))][T.indexOf(T.get(1))] = "A";
     }
 
     /**
