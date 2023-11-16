@@ -28,7 +28,7 @@ public class Main {
 
     private static void parseAndBuildParseTree(String inputFile, String filename) throws IOException {
         ParseTools parseTools = new ParseTools();
-        Parser parser = new Parser();
+        Parser parser = new Parser(parseTools);
 
         //Get the transformed grammar from file
         ContextFreeGrammar contextFreeGrammar = new ContextFreeGrammar("src/resources/CFG.pmp");

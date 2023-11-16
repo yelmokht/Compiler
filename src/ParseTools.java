@@ -18,6 +18,10 @@ public class ParseTools {
 
     public ParseTools(){}
 
+    public Map<String, Set<String>> getFirstKSets() {
+        return firstKSets;
+    }
+
     /**
      * Computes Firstk(X) = Firstk(X1) ⊙k Firstk(X2) ⊙k ... ⊙k Firstk(Xn)
      * @param contextFreeGrammar The context-free grammar

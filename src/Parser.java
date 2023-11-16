@@ -6,11 +6,13 @@ import java.util.Stack;
  * its CFG.
  */
 public class Parser {
+    private ParseTools parseTools;
 
     /**
      * Constructs a new Parser.
      */
-    public Parser() {
+    public Parser(ParseTools parseTools) {
+        this.parseTools = parseTools;
     }
 
     /**
@@ -79,7 +81,7 @@ public class Parser {
 
             // Error
             } else {
-                System.err.println("Error, unexpected symbol : " + lookAhead + ". Expected symbols : TODO"); // + expected symbols); Union First(Follow) pour la rule A
+                System.err.println("Error, unexpected symbol : " + lookAhead + ". Expected symbols : " + parseTools.getFirstKSets().get(x));
                 return false;
             }
         }
