@@ -4,21 +4,17 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class ContextFreeGrammar {
-    private final String filePath;
-    private final Set<String> alphabet = new LinkedHashSet<>();
+    private static final String ARROW = "→";
+    private static final String LEFT_BRACKET = "[";
+    private static final String RIGHT_BRACKET = "]";
     private final List<String> variables = new ArrayList<>();
     private final List<String> terminals = new ArrayList<>();
     private final List<String> variablesAndTerminals = new ArrayList<>();
-    private Map<Integer, Rule> rules = new LinkedHashMap<>();
+    private final Map<Integer, Rule> rules = new HashMap<>();
     private String startSymbol;
 
     public ContextFreeGrammar(String filePath) throws IOException {
-        this.filePath = filePath;
         setupGrammar(filePath);
-    }
-
-    public Set<String> getAlphabet() {
-        return alphabet;
     }
 
     public List<String> getVariables() {
@@ -61,32 +57,34 @@ public class ContextFreeGrammar {
 
     public void setupGrammar(String file) throws IOException {
         List<String> lines = Files.readAllLines(Paths.get(file));
+        Set<String> variablesSet = new LinkedHashSet<>();
+        Set<String> variablesAndTerminalsSet = new LinkedHashSet<>();
 
+        // Rules
         for (String line : lines) {
-            int number = Integer.parseInt(line.substring(line.indexOf("[") + 1, line.indexOf("]")));
-            String leftHandSide = line.substring(line.indexOf("]") + 2, line.indexOf("→") - 1);
-            String rightHandSide = line.substring(line.indexOf("→") + 2);
-            alphabet.add(leftHandSide);
-            alphabet.addAll(Arrays.asList(rightHandSide.split(" ")));
-
-            if (!variables.contains(leftHandSide)) {
-                variables.add(leftHandSide);
-            }
-
+            int number = Integer.parseInt(line.substring(line.indexOf(LEFT_BRACKET) + 1, line.indexOf(RIGHT_BRACKET)));
+            String leftHandSide = line.substring(line.indexOf(RIGHT_BRACKET) + 2, line.indexOf(ARROW) - 1);
+            String rightHandSide = line.substring(line.indexOf(ARROW) + 2);
+            variablesSet.add(leftHandSide);
+            variablesAndTerminalsSet.add(leftHandSide);
+            variablesAndTerminalsSet.addAll(Arrays.asList(rightHandSide.split(" ")));
             Rule rule = new Rule(leftHandSide, new ArrayList<>(List.of(rightHandSide.split(" "))), number);
             rules.put(number, rule);
-            startSymbol = rules.get(1).getLeftHandSide();
         }
 
-        for (String line : lines) {
-            String rightHandSide = line.substring(line.indexOf("→") + 2);
-            for (String symbol : rightHandSide.split(" ")) {
-                if (!variables.contains(symbol) && !terminals.contains(symbol)) {
-                    terminals.add(symbol);
-                }
-            }
-        }
+        // Start symbol
+        startSymbol = rules.get(1).getLeftHandSide();
+
+        // Variables
+        variables.addAll(variablesSet);
+
+        // Terminals
+        terminals.addAll(variablesAndTerminalsSet);
+        terminals.removeAll(variables);
+
+        //Variables and terminals
         variablesAndTerminals.addAll(variables);
         variablesAndTerminals.addAll(terminals);
     }
+
 }

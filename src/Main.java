@@ -33,9 +33,15 @@ public class Main {
         //Get the transformed grammar from file
         ContextFreeGrammar contextFreeGrammar = new ContextFreeGrammar("src/resources/CFG.pmp");
 
+
         //If grammar is LL(1), parse the file
         if(parseTools.isGrammarLLK(contextFreeGrammar, 1)) {
+            parseTools.printFirstKSets("src/resources/firstKSets.pmp");
+            parseTools.printFollowKSets("src/resources/followKSets.pmp");
+            parseTools.printFirstKAlphaFollowKA("src/resources/firstKAlphaFollowKASets.pmp");
             String[][] actionTable = parseTools.constructLL1ActionTableFromCFG(contextFreeGrammar);
+            parseTools.printActionTable(contextFreeGrammar, "src/resources/actionTable.txt");
+
             FileReader fileReader = new FileReader(inputFile);
             LexicalAnalyzer lexicalAnalyzer = new LexicalAnalyzer(fileReader);
             List<String> inputWord = new LinkedList<>();
@@ -65,5 +71,6 @@ public class Main {
             //ParseTree parseTree = new ParseTree(inputFile, filename);
             //parseTree.toLatex();
         }
+
     }
 }

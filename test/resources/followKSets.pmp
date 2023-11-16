@@ -1,0 +1,6 @@
+Followk(<S>) = [ε]
+Followk(<Exp>) = [$, )]
+Followk(<Exp′>) = [$, )]
+Followk(<Prod>) = [+, −, $, )]
+Followk(<Prod′>) = [+, −, $, )]
+Followk(<Atom>) = [∗, /, +, −, $, )]
