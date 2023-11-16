@@ -251,7 +251,7 @@ public class ParseTools {
         }
 
         String terminal = contextFreeGrammar.getRules().get(1).getRightHandSide().getLast();
-        actionTable[VAndT.indexOf(terminal)][T.indexOf(terminal)] = "A";
+        //actionTable[VAndT.indexOf(terminal)][T.indexOf(terminal)] = "A";
 
         /* Add Produce actions */
         for (Rule rule : P) {
