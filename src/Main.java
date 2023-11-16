@@ -50,7 +50,7 @@ public class Main {
                 String word = String.valueOf(symbol.getValue());
 
                 if (symbol.getType() == LexicalUnit.VARNAME) {
-                    word = "[Varname]";
+                    word = "[VarName]";
                 }
 
                 if (symbol.getType() == LexicalUnit.NUMBER) {

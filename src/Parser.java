@@ -39,7 +39,7 @@ public class Parser {
             System.out.println("X : " + x);
             int row = VAndT.indexOf(x);
             String lookAhead = inputWord.get(j-1);
-            int column = T.indexOf(inputWord.get(j-1));
+            int column = T.indexOf(lookAhead);
 
             System.out.println("ROW : " + row);
             System.out.println("LOOK-AHEAD : " + lookAhead);
@@ -56,7 +56,9 @@ public class Parser {
 
                 // Push(alpha)
                 for (String string : alpha.reversed()) {
-                    stack.push(string);
+                    if (!string.equals(ParseTools.EPSILON)) {
+                        stack.push(string);
+                    }
 
                 }
 
