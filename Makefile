@@ -9,8 +9,6 @@ JAR_DIR = dist
 INPUT_FILE = sourceFile.pmp
 OUTPUT_FILE = sourceFile.tex
 
-all: parse_and_build_tree
-
 lex: $(SRC_DIR)/LexicalAnalyzer.flex
 	$(JFLEX) $(SRC_DIR)/LexicalAnalyzer.flex
 
@@ -31,6 +29,10 @@ launch_parse_only: jar
 
 launch_parse_and_build_tree: jar
 	$(JAVA) -jar $(JAR_DIR)/$(JAR_NAME) -wt $(OUTPUT_FILE) $(INPUT_FILE)
+
+all: parse_and_build_tree
+
+.PHONY: clean
 
 clean:
 	rm -rf $(JAR_DIR)/$(JAR_NAME) $(BUILD_DIR)/*

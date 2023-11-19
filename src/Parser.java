@@ -81,7 +81,7 @@ public class Parser {
 
             // Error
             } else {
-                System.err.println("Error, unexpected symbol : " + lookAhead + ". Expected symbols : " + parseTools.getFirstKSets().get(x));
+                System.err.println("Error, unexpected symbol : " + lookAhead + ". Expected symbols : " + parseTools.getFirstKSets().get(x)); //
                 return false;
             }
         }

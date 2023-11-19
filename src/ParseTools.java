@@ -223,7 +223,6 @@ public class ParseTools {
             }
         }
 
-        System.out.println("This context free grammar is LL(" + k + ")");
         return true;
     }
 
@@ -283,7 +282,7 @@ public class ParseTools {
             for (String variable : firstKSets.keySet()) {
                 writer.println("Firstk(" + variable + ") = " + firstKSets.get(variable));
             }
-            System.out.println("Content written to file successfully to : " + filePath + ")");
+            //System.out.println("Content written to file successfully to : " + filePath + ")");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -294,7 +293,7 @@ public class ParseTools {
             for (String variable : followKSets.keySet()) {
                 writer.println("Followk(" + variable + ") = " + followKSets.get(variable));
             }
-            System.out.println("Content written to file successfully to : " + filePath + ")");
+            //System.out.println("Content written to file successfully to : " + filePath + ")");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -305,7 +304,7 @@ public class ParseTools {
             for (String alphaFollowKA : firstKAlphaFollowKASets.keySet()) {
                 writer.println("Firstk(" + alphaFollowKA + ") = " + firstKAlphaFollowKASets.get(alphaFollowKA));
             }
-            System.out.println("Content written to file successfully to : " + filePath + ")");
+            //System.out.println("Content written to file successfully to : " + filePath + ")");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -345,7 +344,7 @@ public class ParseTools {
                     writer.println();
                 }
             }
-            System.out.println("Table exported to: " + filePath + ")");
+            //System.out.println("Table exported to: " + filePath + ")");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

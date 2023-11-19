@@ -1,0 +1,41 @@
+[1] <Program> → begin <Code> end
+[2] <Code> → <InstList>
+[3] <Code> → ε
+[4] <InstList> → <Instruction> <InstList'>
+[5] <InstList'> → ... <InstList>
+[6] <InstList'> → ε
+[7] <Instruction> → <Assign>
+[8] <Instruction> → <If>
+[9] <Instruction> → <While>
+[10] <Instruction> → <Print>
+[11] <Instruction> → <Read>
+[12] <Instruction> → begin <InstList> end
+[13] <Assign> → [VarName] := <ExprArith>
+[14] <ExprArith> → <ExprProd> <ExprArith'>
+[15] <ExprArith'> → + <ExprProd> <ExprArith'>
+[16] <ExprArith'> → - <ExprProd> <ExprArith'>
+[17] <ExprArith'> → ε
+[18] <ExprProd> → <Term> <ExprProd'>
+[19] <ExprProd'> → * <Term> <ExprProd'>
+[20] <ExprProd'> → / <Term> <ExprProd'>
+[21] <ExprProd'> → ε
+[22] <Term> → - <Term>
+[23] <Term> → ( <Term> )
+[24] <Term> → [VarName]
+[25] <Term> → [Number]
+[26] <If> → if <Cond> then <Instruction> <If'>
+[27] <If'> → else <Instruction>
+[28] <If'> → ε
+[29] <Cond> → <CondConj> <Cond'>
+[30] <Cond> → { <Cond> }
+[31] <Cond'> → or <CondConj> <Cond'>
+[32] <Cond'> → ε
+[33] <CondConj> → <SimpleCond> <CondConj'>
+[34] <CondConj'> → and <SimpleCond> <CondConj'>
+[35] <CondConj'> → ε
+[36] <SimpleCond> → <ExprArith> <Comp> <ExprArith>
+[37] <Comp> → =
+[38] <Comp> → <
+[39] <While> → while <Cond> do <Instruction>
+[40] <Print> → print ( [VarName] )
+[41] <Read> → read ( [VarName] )

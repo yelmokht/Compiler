@@ -1,63 +1,53 @@
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TestParser {
+    private static final String filePath = "test/resources/temp.pmp";
+    private static PrintStream fileStream;
 
-    @Test
-    public void checkGrammarIsLL1() throws IOException {
-        String inputFilePath = "test/resources/CFG1.pmp";
-        assertTrue("The file does not exist", new File(inputFilePath).isFile());
-        ContextFreeGrammar contextFreeGrammar = new ContextFreeGrammar(inputFilePath);
-        ParseTools parseTools = new ParseTools();
-        int k = 1;
-        assertTrue("The grammar is not LL(" + k + ")", parseTools.isGrammarLLK(contextFreeGrammar, k));
+    @Before
+    public void redirectStandardOutputStream() throws IOException {
+        fileStream = new PrintStream(filePath);
+        System.setOut(fileStream);
     }
 
-    @Test
-    public void constructedActionTableMatchExpectedActionTable() throws IOException {
-        String inputFilePath = "test/resources/CFG.pmp";
-        String expectedActionTableFilePath = "test/resources/expectedActionTable.pmp";
-        assertTrue("The file does not exist", new File(expectedActionTableFilePath).isFile());
-        ContextFreeGrammar contextFreeGrammar = new ContextFreeGrammar(inputFilePath);
-        ParseTools parseTools = new ParseTools();
-        int k = 1;
-        parseTools.isGrammarLLK(contextFreeGrammar, k);
-        parseTools.constructLL1ActionTableFromCFG(contextFreeGrammar);
-        String outputActionTableFilePath = "test/resources/actionTable.pmp";
-        parseTools.printActionTable(contextFreeGrammar, outputActionTableFilePath);
-        assertTrue("The file does not exist", new File(outputActionTableFilePath).isFile());
-        List<String> actionTableLines = Files.readAllLines(Paths.get(outputActionTableFilePath));
-        List<String> expectedActionTableLines = Files.readAllLines(Paths.get(expectedActionTableFilePath));
-        assertEquals("The constructed action table is not correct", actionTableLines, expectedActionTableLines);
+    @After
+    public void restoreStandardOutputStream() throws IOException {
+        fileStream.close();
+        System.setOut(System.out);
+        Files.deleteIfExists(Paths.get(filePath));
     }
-
     @Test
-    public void givenInputWordParsingIsAccepted() throws IOException {
-        String inputFilePath = "test/resources/CFG.pmp";
-        String expectedActionTableFilePath = "test/resources/expectedActionTable.pmp";
-        assertTrue("The file does not exist", new File(inputFilePath).isFile());
-        assertTrue("The file does not exist", new File(expectedActionTableFilePath).isFile());
-        ContextFreeGrammar contextFreeGrammar = new ContextFreeGrammar(inputFilePath);
-        ParseTools parseTools = new ParseTools();
-        Parser parser = new Parser(parseTools);
-        int k = 1;
-        parseTools.isGrammarLLK(contextFreeGrammar, k);
-        String[][] actionTable = parseTools.constructLL1ActionTableFromCFG(contextFreeGrammar);
-        String actionTableFilePath = "test/resources/actionTable.pmp";
-        assertTrue("The file does not exist", new File(actionTableFilePath).isFile());
-        String inputWord = "Id + Id ∗ Id $"; // The scanner cannot read the input word so we have to manually input it
-        List<String> actionTableLines = Files.readAllLines(Paths.get(actionTableFilePath));
-        List<String> expectedActionTableLines = Files.readAllLines(Paths.get(expectedActionTableFilePath)); //Check for space
-        assertEquals("The constructed action table is not correct", actionTableLines, expectedActionTableLines);
-    }
+    public void givenInputParsingIsAccepted() throws IOException {
+        Path directoryPath = Paths.get("test/resources/parser/input");
+        assertTrue("The directory does not exist", directoryPath.toFile().isDirectory());
 
+        File[] files = directoryPath.toFile().listFiles();
+        assert files != null && files.length > 0 : "The directory is empty";
+
+        for (File file : files) {
+            Main.main(new String[]{file.getPath()});
+
+            Path actualFilePath = Paths.get("test/resources/parser/actual/left_most_derivation/lmd_" + file.getName());
+            Files.copy(Paths.get(filePath), actualFilePath, StandardCopyOption.REPLACE_EXISTING);
+            List<String> actualLines = Files.readAllLines(actualFilePath);
+            String expectedFilePath = "test/resources/parser/expected/left_most_derivation/expected_lmd_" + file.getName();
+            List<String> expectedLines = Files.readAllLines(Paths.get(expectedFilePath));
+            assertEquals("The input word is not an element of L(G)", expectedLines, actualLines);
+        }
+    }
 
 }

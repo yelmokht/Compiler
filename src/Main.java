@@ -66,10 +66,8 @@ public class Main {
             throw new IllegalArgumentException("This context free grammar cannot be LL(1). Exiting ...");
         }
 
-        //If filename is given, return the parse tree in LaTeX
         if (filename != null) {
-            //ParseTree parseTree = new ParseTree(inputFile, filename);
-            //parseTree.toLatex();
+
         }
 
     }

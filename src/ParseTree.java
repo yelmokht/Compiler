@@ -24,7 +24,7 @@ public class ParseTree {
      */
     public ParseTree(Symbol lbl) {
         this.label = lbl;
-        this.children = new ArrayList<ParseTree>(); // This tree has no children
+        this.children = new ArrayList<>(); // This tree has no children
     }
 
     /**
