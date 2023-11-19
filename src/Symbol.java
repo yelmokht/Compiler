@@ -1,8 +1,10 @@
-public class Symbol{
+import java.util.Objects;
+
+public class Symbol {
 	public static final int UNDEFINED_POSITION = -1;
 	public static final Object NO_VALUE = null;
-	private final LexicalUnit type;
-	private final Object value;
+	private LexicalUnit type; //LexicalUnit.NUMBER
+	private Object value; //0
 	private final int line,column;
 
 	public Symbol(LexicalUnit unit,int line,int column,Object value){
@@ -33,7 +35,7 @@ public class Symbol{
 	}
 	
 	public boolean isNonTerminal(){
-		return this.type == null;
+		return this.type == LexicalUnit.VARIABLE;
 	}
 	
 	public LexicalUnit getType(){
@@ -51,7 +53,28 @@ public class Symbol{
 	public int getColumn(){
 		return this.column;
 	}
-	
+
+	public void setType(LexicalUnit type) {
+		this.type = type;
+	}
+
+	public void setValue(Object value) {
+		this.value = value;
+	}
+
+	public String toTexString() {
+		return (String) this.value;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Symbol symbol = (Symbol) o;
+		return Objects.equals(type, symbol.type) &&
+				Objects.equals(value, symbol.value);
+	}
+
 	@Override
 	public int hashCode(){
 		final String value	= this.value != null? this.value.toString() : "null";
@@ -61,11 +84,16 @@ public class Symbol{
 	
 	@Override
 	public String toString(){
-		if(this.isTerminal()){
-			final String value	= this.value != null? this.value.toString() : "null";
-			final String type		= this.type  != null? this.type.toString()  : "null";
-			return "token: "+value+"\tlexical unit: "+type;
+		if (this.isTerminal()){
+			if (this.type == LexicalUnit.VARIABLE || this.type == LexicalUnit.TERMINAL) {
+				return this.value.toString();
+			} else {
+				final String value = this.value != null ? this.value.toString() : "null";
+				final String type = this.type != null ? this.type.toString() : "null";
+				return "token: " + value + "\tlexical unit: " + type;
+			}
 		}
 		return "Non-terminal symbol";
 	}
+
 }

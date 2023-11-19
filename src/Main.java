@@ -1,5 +1,6 @@
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,42 +34,45 @@ public class Main {
         //Get the transformed grammar from file
         ContextFreeGrammar contextFreeGrammar = new ContextFreeGrammar("src/resources/CFG.pmp");
 
-
         //If grammar is LL(1), parse the file
         if(parseTools.isGrammarLLK(contextFreeGrammar, 1)) {
             parseTools.printFirstKSets("src/resources/firstKSets.pmp");
             parseTools.printFollowKSets("src/resources/followKSets.pmp");
             parseTools.printFirstKAlphaFollowKA("src/resources/firstKAlphaFollowKASets.pmp");
             String[][] actionTable = parseTools.constructLL1ActionTableFromCFG(contextFreeGrammar);
-            parseTools.printActionTable(contextFreeGrammar, "src/resources/actionTable.txt");
+            parseTools.printActionTable(contextFreeGrammar, "src/resources/actionTable.pmp");
 
             FileReader fileReader = new FileReader(inputFile);
             LexicalAnalyzer lexicalAnalyzer = new LexicalAnalyzer(fileReader);
-            List<String> inputWord = new LinkedList<>();
+            List<Symbol> inputWord = new LinkedList<>();
+            List<Symbol> input = new LinkedList<>();
             while (!lexicalAnalyzer.yyatEOF()) {
                 Symbol symbol = lexicalAnalyzer.nextToken();
-                String word = String.valueOf(symbol.getValue());
+                if (symbol.getValue() != null) {
+                    if (symbol.getType() == LexicalUnit.NUMBER) {;
+                        input.add(new Symbol(LexicalUnit.TERMINAL, "[Number]"));
+                    }
 
-                if (symbol.getType() == LexicalUnit.VARNAME) {
-                    word = "[VarName]";
-                }
+                    else if (symbol.getType() == LexicalUnit.VARNAME) {
+                        input.add(new Symbol(LexicalUnit.TERMINAL, "[VarName]"));
+                    }
 
-                if (symbol.getType() == LexicalUnit.NUMBER) {
-                    word = "[Number]";
-                }
-
-                if (!word.equals("null")) {
-                    inputWord.add(word);
+                    else {
+                        symbol.setType(LexicalUnit.TERMINAL);
+                        input.add(symbol);
+                    }
+                    symbol.setType(LexicalUnit.TERMINAL);
+                    inputWord.add(symbol);
                 }
             }
-            parser.parse(contextFreeGrammar, actionTable, inputWord);
+            if (filename == null) {
+                parser.parse(contextFreeGrammar, actionTable, input);
+            } else {
+                parser.parseAndBuildTree(contextFreeGrammar, actionTable, input);
+            }
+
         } else {
             throw new IllegalArgumentException("This context free grammar cannot be LL(1). Exiting ...");
         }
-
-        if (filename != null) {
-
-        }
-
     }
 }

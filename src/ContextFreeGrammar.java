@@ -7,25 +7,25 @@ public class ContextFreeGrammar {
     private static final String ARROW = "→";
     private static final String LEFT_BRACKET = "[";
     private static final String RIGHT_BRACKET = "]";
-    private final List<String> variables = new ArrayList<>();
-    private final List<String> terminals = new ArrayList<>();
-    private final List<String> variablesAndTerminals = new ArrayList<>();
+    private final List<Symbol> variables = new ArrayList<>();
+    private final List<Symbol> terminals = new ArrayList<>();
+    private final List<Symbol> variablesAndTerminals = new ArrayList<>();
     private final Map<Integer, Rule> rules = new HashMap<>();
-    private String startSymbol;
+    private Symbol startSymbol;
 
     public ContextFreeGrammar(String filePath) throws IOException {
         setupGrammar(filePath);
     }
 
-    public List<String> getVariables() {
+    public List<Symbol> getVariables() {
         return variables;
     }
 
-    public List<String> getTerminals() {
+    public List<Symbol> getTerminals() {
         return terminals;
     }
 
-    public List<String> getVariablesAndTerminals() {
+    public List<Symbol> getVariablesAndTerminals() {
         return variablesAndTerminals;
     }
 
@@ -33,15 +33,15 @@ public class ContextFreeGrammar {
         return rules;
     }
 
-    public String getStartSymbol() {
+    public Symbol getStartSymbol() {
         return startSymbol;
     }
 
-    public boolean isVariable(String variable) {
+    public boolean isVariable(Symbol variable) {
         return variables.contains(variable);
     }
 
-    public boolean isTerminal(String terminal) {
+    public boolean isTerminal(Symbol terminal) {
         return terminals.contains(terminal);
     }
 
@@ -59,6 +59,9 @@ public class ContextFreeGrammar {
         List<String> lines = Files.readAllLines(Paths.get(file));
         Set<String> variablesSet = new LinkedHashSet<>();
         Set<String> variablesAndTerminalsSet = new LinkedHashSet<>();
+        List<String> v = new ArrayList<>();
+        List<String> t = new ArrayList<>();
+        List<String> vt = new ArrayList<>();
 
         // Rules
         for (String line : lines) {
@@ -68,23 +71,50 @@ public class ContextFreeGrammar {
             variablesSet.add(leftHandSide);
             variablesAndTerminalsSet.add(leftHandSide);
             variablesAndTerminalsSet.addAll(Arrays.asList(rightHandSide.split(" ")));
-            Rule rule = new Rule(leftHandSide, new ArrayList<>(List.of(rightHandSide.split(" "))), number);
+        }
+
+        // Variables
+        v.addAll(variablesSet);
+
+        // Terminals
+        t.addAll(variablesAndTerminalsSet);
+        t.removeAll(v);
+
+        //Variables and terminals
+        vt.addAll(v);
+        vt.addAll(t);
+
+        for (String s : v) {
+            variables.add(new Symbol(LexicalUnit.VARIABLE, s));
+        }
+
+        for (String s : t) {
+            terminals.add(new Symbol(LexicalUnit.TERMINAL, s));
+        }
+
+        variablesAndTerminals.addAll(variables);
+        variablesAndTerminals.addAll(terminals);
+
+        for (String line : lines) {
+            int number = Integer.parseInt(line.substring(line.indexOf(LEFT_BRACKET) + 1, line.indexOf(RIGHT_BRACKET)));
+            String leftHandSide = line.substring(line.indexOf(RIGHT_BRACKET) + 2, line.indexOf(ARROW) - 1);
+            String rightHandSide = line.substring(line.indexOf(ARROW) + 2);
+            Symbol l = new Symbol(LexicalUnit.VARIABLE, leftHandSide);
+            List<Symbol> r = new ArrayList<>();
+            for (String s : rightHandSide.split(" ")) {
+                if (v.contains(s)) {
+                    r.add(new Symbol(LexicalUnit.VARIABLE, s));
+                } else {
+                    r.add(new Symbol(LexicalUnit.TERMINAL, s));
+                }
+            }
+            Rule rule = new Rule(l, r, number);
             rules.put(number, rule);
         }
 
         // Start symbol
         startSymbol = rules.get(1).getLeftHandSide();
 
-        // Variables
-        variables.addAll(variablesSet);
-
-        // Terminals
-        terminals.addAll(variablesAndTerminalsSet);
-        terminals.removeAll(variables);
-
-        //Variables and terminals
-        variablesAndTerminals.addAll(variables);
-        variablesAndTerminals.addAll(terminals);
     }
 
 }

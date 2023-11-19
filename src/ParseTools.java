@@ -9,16 +9,17 @@ import java.util.*;
  */
 public class ParseTools {
 
-    public static final String EPSILON = "ε";
-    public static final String FOLLOW = "Follow";
-    private Map<String, Set<String>> firstKSets = new LinkedHashMap<>();
-    private Map<String, Set<String>> followKSets = new LinkedHashMap<>();
-    private Map<String, Set<String>> firstKAlphaFollowKASets = new LinkedHashMap<>();
+    public static final Symbol EPSILON = new Symbol(LexicalUnit.TERMINAL, "ε");
+    public static final Symbol FOLLOW = new Symbol(LexicalUnit.TERMINAL, "Follow");
+    private Map<Symbol, Set<Symbol>> firstKSets = new LinkedHashMap<>();
+    private Map<Symbol, Set<Symbol>> followKSets = new LinkedHashMap<>();
+    private Map<List<Symbol>, Set<Symbol>> firstKAlphaFollowKASets = new LinkedHashMap<>();
     private String[][] actionTable;
 
     public ParseTools(){}
 
-    public Map<String, Set<String>> getFirstKSets() {
+
+    public Map<Symbol, Set<Symbol>> getFirstKSets() {
         return firstKSets;
     }
 
@@ -29,20 +30,20 @@ public class ParseTools {
      * @param stringList The list of strings where X is a list (X1, X2, ..., Xn)
      * @return First(X) set
      */
-    private Set<String> firstK(ContextFreeGrammar contextFreeGrammar, int k, List<String> stringList) {
-        Set<String> firstKSet = new LinkedHashSet<>();
+    private Set<Symbol> firstK(ContextFreeGrammar contextFreeGrammar, int k, List<Symbol> stringList) {
+        Set<Symbol> firstKSet = new LinkedHashSet<>();
 
-        for (String string : stringList) {
-            if (!(contextFreeGrammar.isVariable(string) || contextFreeGrammar.isTerminal(string))) {
+        for (Symbol symbol : stringList) {
+            if (!(contextFreeGrammar.isVariable(symbol) || contextFreeGrammar.isTerminal(symbol))) {
                 throw new IllegalArgumentException("Cannot compute firstK");
             }
 
-            if (firstKSets.get(string).isEmpty()) {
+            if (firstKSets.get(symbol).isEmpty()) {
                 return new LinkedHashSet<>();
             }
 
             if (firstKSet.size() < k) {
-                firstKSet.addAll(firstKSets.get(string));
+                firstKSet.addAll(firstKSets.get(symbol));
             }
         }
         return firstKSet;
@@ -56,8 +57,8 @@ public class ParseTools {
      * @param beta The list of strings
      * @return Followk(X) set
      */
-    private Set<String> followK(ContextFreeGrammar contextFreeGrammar, int k, String A, List<String> beta) {
-        Set<String> followKSet = new LinkedHashSet<>(firstK(contextFreeGrammar, k, beta));
+    private Set<Symbol> followK(ContextFreeGrammar contextFreeGrammar, int k, Symbol A, List<Symbol> beta) {
+        Set<Symbol> followKSet = new LinkedHashSet<>(firstK(contextFreeGrammar, k, beta));
 
         if (followKSet.contains(EPSILON)) {
             followKSet.remove(EPSILON);
@@ -73,9 +74,9 @@ public class ParseTools {
      * @param stringList The list of strings
      * @return Firstk(X) set
      */
-    private Set<String> firstKAlphaFollowKA(ContextFreeGrammar contextFreeGrammar, int k, List<String> stringList) {
-        String alpha = stringList.get(0);
-        String A = stringList.get(stringList.size() - 1);
+    private Set<Symbol> firstKAlphaFollowKA(ContextFreeGrammar contextFreeGrammar, int k, List<Symbol> stringList) {
+        Symbol alpha = stringList.get(0);
+        Symbol A = stringList.get(stringList.size() - 1);
         if (!alpha.equals(EPSILON)) {
             return firstK(contextFreeGrammar, k, List.of(alpha));
         } else {
@@ -92,13 +93,13 @@ public class ParseTools {
      * @param k The parameter k in Firstk
      * @return The First sets
      */
-    private Map<String, Set<String>> constructFirstKSets(ContextFreeGrammar contextFreeGrammar, int k) {
+    private Map<Symbol, Set<Symbol>> constructFirstKSets(ContextFreeGrammar contextFreeGrammar, int k) {
         // Initialize First sets
-        for (String terminal : contextFreeGrammar.getTerminals()) {
+        for (Symbol terminal : contextFreeGrammar.getTerminals()) {
             firstKSets.put(terminal, new LinkedHashSet<>(List.of(terminal)));
         }
 
-        for (String variable : contextFreeGrammar.getVariables()) {
+        for (Symbol variable : contextFreeGrammar.getVariables()) {
             firstKSets.put(variable, new LinkedHashSet<>());
         }
 
@@ -107,9 +108,9 @@ public class ParseTools {
         do {
             atLeastOneFirstKSetHasBeenUpdated = false;
             for (Rule rule : contextFreeGrammar.getRules().values()) {
-                String A = rule.getLeftHandSide();
-                Set<String> oldFollowKSet  = new LinkedHashSet<>(firstKSets.get(A));
-                Set<String> firstKSet = firstK(contextFreeGrammar, k, rule.getRightHandSide());
+                Symbol A = rule.getLeftHandSide();
+                Set<Symbol> oldFollowKSet = new LinkedHashSet<>(firstKSets.get(A));
+                Set<Symbol> firstKSet = firstK(contextFreeGrammar, k, rule.getRightHandSide());
                 firstKSets.get(A).addAll(firstKSet);
                 if (!atLeastOneFirstKSetHasBeenUpdated && !oldFollowKSet.equals(firstKSets.get(rule.getLeftHandSide()))) {
                     atLeastOneFirstKSetHasBeenUpdated = true;
@@ -127,9 +128,9 @@ public class ParseTools {
      * @param k The parameter k in Followk
      * @return The Follow sets
      */
-    private Map<String, Set<String>> constructFollowKSets(ContextFreeGrammar contextFreeGrammar, int k) {
+    private Map<Symbol, Set<Symbol>> constructFollowKSets(ContextFreeGrammar contextFreeGrammar, int k) {
         //Initialize Follow sets
-        for (String variable : contextFreeGrammar.getVariables()) {
+        for (Symbol variable : contextFreeGrammar.getVariables()) {
             followKSets.put(variable, new LinkedHashSet<>());
         }
 
@@ -140,14 +141,14 @@ public class ParseTools {
         do {
             atLeastOneFollowKSetHasBeenUpdated = false;
             for (Rule rule : contextFreeGrammar.getRules().values()) {
-                String A = rule.getLeftHandSide();
-                List<String> rightHandSide = rule.getRightHandSide();
+                Symbol A = rule.getLeftHandSide();
+                List<Symbol> rightHandSide = rule.getRightHandSide();
                 for (int i = 0; i < rightHandSide.size(); i++) {
-                    String B = rightHandSide.get(i);
+                    Symbol B = rightHandSide.get(i);
                     if (contextFreeGrammar.getVariables().contains(B)) {
-                        List<String> beta = rightHandSide.subList(i + 1, rightHandSide.size());
-                        Set<String> oldFollowKSet = new LinkedHashSet<>(followKSets.get(B));
-                        Set<String> followKSet = beta.isEmpty() ? followK(contextFreeGrammar, k, A, List.of(EPSILON)) : followK(contextFreeGrammar, k, A, beta);
+                        List<Symbol> beta = rightHandSide.subList(i + 1, rightHandSide.size());
+                        Set<Symbol> oldFollowKSet = new LinkedHashSet<>(followKSets.get(B));
+                        Set<Symbol> followKSet = beta.isEmpty() ? followK(contextFreeGrammar, k, A, List.of(EPSILON)) : followK(contextFreeGrammar, k, A, beta);
                         followKSets.get(B).addAll(followKSet);
                         if (!atLeastOneFollowKSetHasBeenUpdated && !oldFollowKSet.equals(followKSets.get(B))) {
                             atLeastOneFollowKSetHasBeenUpdated = true;
@@ -202,18 +203,18 @@ public class ParseTools {
         // Check that Firstk(alphaFollowk(A)) is empty for all pairs of rules A -> alpha
         for (List<Integer> sameRules : occurrencesRules(contextFreeGrammar)) {
             Rule firstRule = contextFreeGrammar.getRules().get(sameRules.get(0));
-            String leftHandSide = firstRule.getLeftHandSide();
-            List<String> rightHandSide = new ArrayList<>(firstRule.getRightHandSide());
+            Symbol leftHandSide = firstRule.getLeftHandSide();
+            List<Symbol> rightHandSide = new ArrayList<>(firstRule.getRightHandSide());
             rightHandSide.addAll(List.of(FOLLOW, leftHandSide));
-            Set<String> intersectionSet = new LinkedHashSet<>(firstKAlphaFollowKA(contextFreeGrammar, k, rightHandSide));
+            Set<Symbol> intersectionSet = new LinkedHashSet<>(firstKAlphaFollowKA(contextFreeGrammar, k, rightHandSide));
 
             for (int ruleNumber : sameRules) {
                 Rule rule = contextFreeGrammar.getRules().get(ruleNumber);
-                String A = rule.getLeftHandSide();
-                List<String> alphaFollowKA = new ArrayList<>(rule.getRightHandSide());
-                alphaFollowKA.addAll(List.of(FOLLOW, A));
-                Set<String> ruleFirstKSet = firstKAlphaFollowKA(contextFreeGrammar, k, alphaFollowKA);
-                firstKAlphaFollowKASets.put(String.valueOf(alphaFollowKA), new LinkedHashSet<>(ruleFirstKSet));
+                Symbol A = rule.getLeftHandSide();
+                List<Symbol> alphaFollowKA = new ArrayList<>(rule.getRightHandSide());
+                alphaFollowKA.addAll(List.of(FOLLOW, A)); //
+                Set<Symbol> ruleFirstKSet = firstKAlphaFollowKA(contextFreeGrammar, k, alphaFollowKA);
+                firstKAlphaFollowKASets.put(alphaFollowKA, new LinkedHashSet<>(ruleFirstKSet));
                 intersectionSet.retainAll(ruleFirstKSet);
             }
 
@@ -233,36 +234,36 @@ public class ParseTools {
      */
     public String[][] constructLL1ActionTableFromCFG(ContextFreeGrammar contextFreeGrammar){
         /* Initialize action table */
-        List<String> T = contextFreeGrammar.getTerminals();
-        List<String> V = contextFreeGrammar.getVariables();
-        List<String> VAndT = contextFreeGrammar.getVariablesAndTerminals();
+        List<Symbol> T = contextFreeGrammar.getTerminals();
+        List<Symbol> V = contextFreeGrammar.getVariables();
+        List<Symbol> VAndT = contextFreeGrammar.getVariablesAndTerminals();
         Collection<Rule> P = contextFreeGrammar.getRules().values();
 
         actionTable = new String[VAndT.size()][T.size()];
 
-        for (String a : T) {
+        for (Symbol a : T) {
 
-            for (String A : V) {
+            for (Symbol A : V) {
                 actionTable[VAndT.indexOf(A)][T.indexOf(a)] = "0";
             }
 
-            for (String b : T) {
-                    actionTable[VAndT.indexOf(b)][T.indexOf(a)] = "0";
+            for (Symbol b : T) {
+                actionTable[VAndT.indexOf(b)][T.indexOf(a)] = "0";
             }
 
             actionTable[VAndT.indexOf(a)][T.indexOf(a)] = "M";
         }
 
-        String terminal = contextFreeGrammar.getRules().get(1).getRightHandSide().getLast();
+        Symbol terminal = contextFreeGrammar.getRules().get(1).getRightHandSide().getLast();
         //actionTable[VAndT.indexOf(terminal)][T.indexOf(terminal)] = "A";
 
         /* Add Produce actions */
         for (Rule rule : P) {
-            String A = rule.getLeftHandSide();
-            List<String> alpha = new ArrayList<>(rule.getRightHandSide());
+            Symbol A = rule.getLeftHandSide();
+            List<Symbol> alpha = new ArrayList<>(rule.getRightHandSide());
             alpha.addAll(List.of(FOLLOW, A));
 
-            for (String a : firstKAlphaFollowKA(contextFreeGrammar, 1, alpha)) {
+            for (Symbol a : firstKAlphaFollowKA(contextFreeGrammar, 1, alpha)) {
                 int i = rule.getNumber();
 
                 if (actionTable[VAndT.indexOf(A)][T.indexOf(a)].equals("0")) {
@@ -279,8 +280,8 @@ public class ParseTools {
 
     public void printFirstKSets(String filePath) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
-            for (String variable : firstKSets.keySet()) {
-                writer.println("Firstk(" + variable + ") = " + firstKSets.get(variable));
+            for (Symbol variable : firstKSets.keySet()) {
+                writer.println("Firstk(" + variable.getValue() + ") = " + firstKSets.get(variable));
             }
             //System.out.println("Content written to file successfully to : " + filePath + ")");
         } catch (IOException e) {
@@ -290,8 +291,8 @@ public class ParseTools {
 
     public void printFollowKSets(String filePath) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
-            for (String variable : followKSets.keySet()) {
-                writer.println("Followk(" + variable + ") = " + followKSets.get(variable));
+            for (Symbol variable : followKSets.keySet()) {
+                writer.println("Followk(" + variable.getValue() + ") = " + followKSets.get(variable));
             }
             //System.out.println("Content written to file successfully to : " + filePath + ")");
         } catch (IOException e) {
@@ -301,7 +302,7 @@ public class ParseTools {
 
     public void printFirstKAlphaFollowKA(String filePath) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
-            for (String alphaFollowKA : firstKAlphaFollowKASets.keySet()) {
+            for (List<Symbol> alphaFollowKA : firstKAlphaFollowKASets.keySet()) {
                 writer.println("Firstk(" + alphaFollowKA + ") = " + firstKAlphaFollowKASets.get(alphaFollowKA));
             }
             //System.out.println("Content written to file successfully to : " + filePath + ")");
@@ -316,25 +317,25 @@ public class ParseTools {
      */
     public void printActionTable(ContextFreeGrammar contextFreeGrammar, String filePath) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
-            int maxAlphabetLength = contextFreeGrammar.getVariablesAndTerminals().stream().map(String::length).max(Integer::compare).orElse(0);
-            int maxTerminalsLength = contextFreeGrammar.getTerminals().stream().map(String::length).max(Integer::compare).orElse(0);
+            int maxAlphabetLength = contextFreeGrammar.getVariablesAndTerminals().stream().map(symbol -> symbol.getValue().toString().length()).max(Integer::compare).orElse(0);
+            int maxTerminalsLength = contextFreeGrammar.getTerminals().stream().map(symbol -> symbol.getValue().toString().length()).max(Integer::compare).orElse(0);
             int firstPadding = maxAlphabetLength + 7;
             int inBetweenColumnsPadding = maxTerminalsLength + 2;
 
             // Headers
             writer.printf("%-" + firstPadding + "s", "");
-            for (String terminal : contextFreeGrammar.getTerminals()) {
+            for (Symbol terminal : contextFreeGrammar.getTerminals()) {
                 if (!terminal.equals(EPSILON)) {
-                    writer.printf("%-" + inBetweenColumnsPadding + "s", terminal);
+                    writer.printf("%-" + inBetweenColumnsPadding + "s", terminal.getValue());
                 }
             }
             writer.println();
 
             // Table
             for (int i = 0; i < actionTable.length; i++) {
-                String string = contextFreeGrammar.getVariablesAndTerminals().get(i);
-                if (!string.equals(EPSILON)) {
-                    writer.printf("%-" + firstPadding + "s", string);
+                Symbol symbol = contextFreeGrammar.getVariablesAndTerminals().get(i);
+                if (!symbol.equals(EPSILON)) {
+                    writer.printf("%-" + firstPadding + "s", symbol.getValue());
 
                     for (int j = 0; j < actionTable[0].length; j++) {
                         if (!contextFreeGrammar.getTerminals().get(j).equals(EPSILON)) {

@@ -24,5 +24,7 @@ public enum LexicalUnit{
     DO,
     PRINT,
     READ,
+    VARIABLE,
+    TERMINAL,
     EOS
 }
