@@ -63,8 +63,19 @@ public class Symbol {
 	}
 
 	public String toTexString() {
-		return (String) this.value;
+		if (this.getType() == LexicalUnit.VARIABLE) {
+			return this.getValue().toString().replace("<", "\\textless ").replace(">", "\\textgreater ");
+		} else {
+			if ("<".equals(this.getValue())) {
+				return "\\textless";
+			} else if (">".equals(this.getValue())) {
+				return "\\textgreater";
+			} else {
+				return this.getValue().toString();
+			}
+		}
 	}
+
 
 	@Override
 	public boolean equals(Object o) {
