@@ -65,10 +65,13 @@ public class Main {
                     inputWord.add(symbol);
                 }
             }
-            if (filename == null) {
-                parser.parse(contextFreeGrammar, actionTable, input);
-            } else {
-                parser.parseAndBuildTree(contextFreeGrammar, actionTable, input);
+
+            if (parser.parse(contextFreeGrammar, actionTable, input)) {
+                if (filename != null) {
+                    parser.buildParseTree(contextFreeGrammar);
+                } else {
+                    System.err.println("The input file is not part of the grammar.");
+                }
             }
 
         } else {
