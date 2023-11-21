@@ -42,7 +42,7 @@ public class TestParser {
             Main.main(new String[]{file.getPath()});
 
             Path actualFilePath = Paths.get("test/resources/parser/actual/left_most_derivation/lmd_" + file.getName());
-            Files.copy(Paths.get(filePath), actualFilePath, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(Paths.get(filePath), actualFilePath, StandardCopyOption.REPLACE_EXISTING); //fix copy
             List<String> actualLines = Files.readAllLines(actualFilePath);
             String expectedFilePath = "test/resources/parser/expected/left_most_derivation/expected_lmd_" + file.getName();
             List<String> expectedLines = Files.readAllLines(Paths.get(expectedFilePath));

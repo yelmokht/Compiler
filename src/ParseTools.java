@@ -5,7 +5,8 @@ import java.io.PrintWriter;
 import java.util.*;
 
 /**
- * ParseTools class contains all the tools related to grammars.
+ * ParseTools class contains all the tools related to grammars
+ * such as Firstk, Followk, Firstk(alphaFollowk(A)), LL(k) definition and LL(1) action table
  */
 public class ParseTools {
 
@@ -232,7 +233,7 @@ public class ParseTools {
      * @param contextFreeGrammar The context-free grammar
      * @return The action table
      */
-    public String[][] constructLL1ActionTableFromCFG(ContextFreeGrammar contextFreeGrammar){
+    public String[][] constructLL1ActionTable(ContextFreeGrammar contextFreeGrammar){
         /* Initialize action table */
         List<Symbol> T = contextFreeGrammar.getTerminals();
         List<Symbol> V = contextFreeGrammar.getVariables();
@@ -281,9 +282,8 @@ public class ParseTools {
     public void printFirstKSets(String filePath) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
             for (Symbol variable : firstKSets.keySet()) {
-                writer.println("Firstk(" + variable.getValue() + ") = " + firstKSets.get(variable));
+                writer.println("First1(" + variable.getValue() + ") = " + firstKSets.get(variable));
             }
-            //System.out.println("Content written to file successfully to : " + filePath + ")");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -292,7 +292,7 @@ public class ParseTools {
     public void printFollowKSets(String filePath) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
             for (Symbol variable : followKSets.keySet()) {
-                writer.println("Followk(" + variable.getValue() + ") = " + followKSets.get(variable));
+                writer.println("Follow1(" + variable.getValue() + ") = " + followKSets.get(variable));
             }
             //System.out.println("Content written to file successfully to : " + filePath + ")");
         } catch (IOException e) {
@@ -303,9 +303,8 @@ public class ParseTools {
     public void printFirstKAlphaFollowKA(String filePath) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
             for (List<Symbol> alphaFollowKA : firstKAlphaFollowKASets.keySet()) {
-                writer.println("Firstk(" + alphaFollowKA + ") = " + firstKAlphaFollowKASets.get(alphaFollowKA));
+                writer.println("First1(" + alphaFollowKA + ") = " + firstKAlphaFollowKASets.get(alphaFollowKA));
             }
-            //System.out.println("Content written to file successfully to : " + filePath + ")");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -345,11 +344,11 @@ public class ParseTools {
                     writer.println();
                 }
             }
-            //System.out.println("Table exported to: " + filePath + ")");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
 }
 
 

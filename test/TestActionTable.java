@@ -30,7 +30,7 @@ public class TestActionTable {
             ParseTools parseTools = new ParseTools();
 
             parseTools.isGrammarLLK(contextFreeGrammar, k);
-            parseTools.constructLL1ActionTableFromCFG(contextFreeGrammar);
+            parseTools.constructLL1ActionTable(contextFreeGrammar);
 
             String actualActionTableFilePath = "test/resources/action_table/actual/action_table_" + file.getName();
             parseTools.printActionTable(contextFreeGrammar, actualActionTableFilePath);

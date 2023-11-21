@@ -1,10 +1,15 @@
 import java.util.Objects;
 
+/**
+ * Represents tokens for the scanner.
+ * Also represents a symbol (terminal or variable) in the grammar.
+ */
 public class Symbol {
 	public static final int UNDEFINED_POSITION = -1;
 	public static final Object NO_VALUE = null;
-	private LexicalUnit type; //LexicalUnit.NUMBER
-	private Object value; //0
+	public static final String EPSILON = "ε";
+	private LexicalUnit type;
+	private final Object value;
 	private final int line,column;
 
 	public Symbol(LexicalUnit unit,int line,int column,Object value){
@@ -25,15 +30,26 @@ public class Symbol {
 	public Symbol(LexicalUnit unit){
 		this(unit,UNDEFINED_POSITION,UNDEFINED_POSITION,NO_VALUE);
 	}
-	
-	public Symbol(LexicalUnit unit,Object value){
+
+	/**
+	 * Creates a symbol for the grammar (terminal with TERMINAL type or variable with VARIABLE type)
+	 */
+	public Symbol(LexicalUnit unit, Object value){
 		this(unit,UNDEFINED_POSITION,UNDEFINED_POSITION,value);
 	}
 
+	/**
+	 * Checks if the symbol is a terminal symbol.
+	 * @return True if the symbol is a terminal, false otherwise.
+	 */
 	public boolean isTerminal(){
 		return this.type != null;
 	}
-	
+
+	/**
+	 * Checks if the symbol is a non-terminal symbol (it is variable then).
+	 * @return True if the symbol is a non-terminal, false otherwise.
+	 */
 	public boolean isNonTerminal(){
 		return this.type == LexicalUnit.VARIABLE;
 	}
@@ -58,22 +74,19 @@ public class Symbol {
 		this.type = type;
 	}
 
-	public void setValue(Object value) {
-		this.value = value;
-	}
-
 	public String toTexString() {
 		if (this.getType() == LexicalUnit.VARIABLE) {
 			return this.getValue().toString().replace("<", "\\textless ").replace(">", "\\textgreater ");
-		} else {
-			if ("<".equals(this.getValue())) {
-				return "\\textless";
-			} else if (">".equals(this.getValue())) {
-				return "\\textgreater";
-			} else {
-				return this.getValue().toString();
-			}
 		}
+
+		String value = this.getValue().toString();
+
+        return switch (value) {
+            case "<" -> "\\textless";
+            case ">" -> "\\textgreater";
+            case EPSILON -> "$\\varepsilon$";
+            default -> value;
+        };
 	}
 
 
@@ -82,14 +95,13 @@ public class Symbol {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		Symbol symbol = (Symbol) o;
-		return Objects.equals(type, symbol.type) &&
-				Objects.equals(value, symbol.value);
+		return Objects.equals(type, symbol.type) && Objects.equals(value, symbol.value);
 	}
 
 	@Override
 	public int hashCode(){
-		final String value	= this.value != null? this.value.toString() : "null";
-		final String type		= this.type  != null? this.type.toString()  : "null";
+		final String value = this.value != null? this.value.toString() : "null";
+		final String type = this.type != null? this.type.toString()  : "null";
 		return new String(value+"_"+type).hashCode();
 	}
 	

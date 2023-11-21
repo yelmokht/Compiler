@@ -1,6 +1,7 @@
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.PrintWriter;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -9,73 +10,127 @@ import java.util.List;
  * Ensures also that the command is correctly written and handles errors.
  */
 public class Main {
+    private static final String INPUT_DIRECTORY = "src/resources/";
+    private static final String OUTPUT_DIRECTORY = "src/resources/";
 
     public static void main(String[] args) throws IOException {
         if (args.length < 1 || args.length > 3) {
             throw new IllegalArgumentException("Incorrect number of arguments. Usage: java Main <input_file> or java Main -wt <filename.tex> <input_file>");
         }
-
         if (args.length == 1 && !args[0].equals("-wt")) {
             String inputFile = args[0];
-            parseAndBuildParseTree(inputFile, null); //Argument optionnel -wt
+            parse(inputFile); // Parse the input file only
         } else if (args.length == 3 && args[0].equals("-wt") && args[1].endsWith(".tex")) {
             String filename = args[1];
             String inputFile = args[2];
-            parseAndBuildParseTree(inputFile, filename);
+            parseAndBuildParseTree(inputFile, filename); // Parse the input file and build the parse tree
         } else {
             throw new IllegalArgumentException("Invalid arguments. Use -wt <filename.tex> <input_file>");
         }
     }
 
-    private static void parseAndBuildParseTree(String inputFile, String filename) throws IOException {
-        ParseTools parseTools = new ParseTools();
-        Parser parser = new Parser(parseTools);
+    /**
+     * Scans the input file using the LexicalAnalyzer and generates two lists of Symbols:
+     * 1. input1: With terminals changed (ex: 0 -> [Number] and x -> [VarName])
+     * 2. input2: Without terminals changed (ex: 0 -> 0 and x -> x)
+     * <p></p>
+     * input1 will be used by the parser for the parsing process.
+     * input2 will be used by the parser to generate the parse tree.
+     * @param inputFile The path to the input file.
+     * @return A list containing two lists of Symbols.
+     * @throws IOException If an I/O error occurs.
+     */
+    private static List<List<Symbol>> scan(String inputFile) throws IOException {
+        List<List<Symbol>> inputsList = new LinkedList<>();
+        List<Symbol> input1 = new LinkedList<>();
+        List<Symbol> input2 = new LinkedList<>();
+        FileReader fileReader = new FileReader(inputFile);
+        LexicalAnalyzer lexicalAnalyzer = new LexicalAnalyzer(fileReader);
 
-        //Get the transformed grammar from file
-        ContextFreeGrammar contextFreeGrammar = new ContextFreeGrammar("src/resources/CFG.pmp");
-
-        //If grammar is LL(1), parse the file
-        if(parseTools.isGrammarLLK(contextFreeGrammar, 1)) {
-            parseTools.printFirstKSets("src/resources/firstKSets.pmp");
-            parseTools.printFollowKSets("src/resources/followKSets.pmp");
-            parseTools.printFirstKAlphaFollowKA("src/resources/firstKAlphaFollowKASets.pmp");
-            String[][] actionTable = parseTools.constructLL1ActionTableFromCFG(contextFreeGrammar);
-            parseTools.printActionTable(contextFreeGrammar, "src/resources/actionTable.pmp");
-
-            FileReader fileReader = new FileReader(inputFile);
-            LexicalAnalyzer lexicalAnalyzer = new LexicalAnalyzer(fileReader);
-            List<Symbol> inputWord = new LinkedList<>();
-            List<Symbol> input = new LinkedList<>();
-            while (!lexicalAnalyzer.yyatEOF()) {
-                Symbol symbol = lexicalAnalyzer.nextToken();
-                if (symbol.getValue() != null) {
-                    if (symbol.getType() == LexicalUnit.NUMBER) {;
-                        input.add(new Symbol(LexicalUnit.TERMINAL, "[Number]"));
-                    }
-
-                    else if (symbol.getType() == LexicalUnit.VARNAME) {
-                        input.add(new Symbol(LexicalUnit.TERMINAL, "[VarName]"));
-                    }
-
-                    else {
-                        symbol.setType(LexicalUnit.TERMINAL);
-                        input.add(symbol);
-                    }
-                    symbol.setType(LexicalUnit.TERMINAL);
-                    inputWord.add(symbol);
-                }
-            }
-
-            if (parser.parse(contextFreeGrammar, actionTable, input)) {
-                if (filename != null) {
-                    parser.buildParseTree(contextFreeGrammar);
+        while (!lexicalAnalyzer.yyatEOF()) {
+            Symbol symbol = lexicalAnalyzer.nextToken();
+            if (symbol.getValue() != null) {
+                if (symbol.getType() == LexicalUnit.NUMBER) {
+                    input1.add(new Symbol(LexicalUnit.TERMINAL, "[Number]"));
+                } else if (symbol.getType() == LexicalUnit.VARNAME) {
+                    input1.add(new Symbol(LexicalUnit.TERMINAL, "[VarName]"));
                 } else {
-                    System.err.println("The input file is not part of the grammar.");
+                    symbol.setType(LexicalUnit.TERMINAL);
+                    input1.add(symbol);
                 }
+                symbol.setType(LexicalUnit.TERMINAL);
+                input2.add(symbol);
             }
+        }
+        inputsList.add(input1); // With terminals changed (ex: 0 -> [Number] and x -> [VarName])
+        inputsList.add(input2); // Without terminals changed (ex: 0 -> 0 and x -> x)
+        fileReader.close();
+        lexicalAnalyzer.yyclose();
+        return inputsList;
+    }
 
-        } else {
-            throw new IllegalArgumentException("This context free grammar cannot be LL(1). Exiting ...");
+
+    /**
+     * Parses the input file using the LL(1) recursive descent parser and output on stdout the leftmost derivation
+     * of the input if it is correct or an explanatory error message if there is a syntax error.
+     * @param inputFile The path to the input file to be parsed.
+     * @return A Parser object representing the parsing result if the input word is part of the grammar.
+     * @throws IllegalArgumentException If the grammar is not LL(1) or the input word is not part of the grammar.
+     * @throws IOException If there is an error reading the input file.
+     */
+    private static Parser parse(String inputFile) throws IOException {
+        ContextFreeGrammar contextFreeGrammar = new ContextFreeGrammar(INPUT_DIRECTORY + "CFG.pmp");
+
+        // Check if the grammar is LL(1)
+        ParseTools parseTools = new ParseTools();
+        if (!parseTools.isGrammarLLK(contextFreeGrammar, 1)) {
+            throw new IllegalArgumentException("The grammar is not LL(1).");
+        }
+
+        // Construct LL(1) Action Table
+        String[][] actionTable = parseTools.constructLL1ActionTable(contextFreeGrammar);
+
+        // Save sets and action table for debugging
+        parseTools.printFirstKSets(OUTPUT_DIRECTORY + "first_k_sets.pmp");
+        parseTools.printFollowKSets(OUTPUT_DIRECTORY + "follow_k_sets.pmp");
+        parseTools.printFirstKAlphaFollowKA(OUTPUT_DIRECTORY + "first_k_alpha_follow_k_A.pmp");
+        parseTools.printActionTable(contextFreeGrammar, OUTPUT_DIRECTORY + "action_table_LL1.pmp");
+
+        // Scan the input file
+        List<Symbol> inputWord = scan(inputFile).get(0); // We need the input word with terminals changed for the action table
+
+        // Initialize Parser and attempt parsing
+        Parser parser = new Parser(parseTools);
+        if (!parser.parse(contextFreeGrammar, actionTable, inputWord)) {
+            throw new IllegalArgumentException("The input word is not part of the grammar.");
+        }
+
+        return parser;
+    }
+
+    /**
+     * Parses the input file, builds the parse tree of the input and writes it to a LaTeX file called filename.tex
+     * @param inputFile The path to the input file to be parsed.
+     * @param filename  The name of the output LaTeX file to store the parse tree.
+     * @throws IOException If there is an error reading the input file or writing the parse tree file.
+     */
+    private static void parseAndBuildParseTree(String inputFile, String filename) throws IOException {
+        ContextFreeGrammar contextFreeGrammar = new ContextFreeGrammar(INPUT_DIRECTORY + "CFG.pmp");
+
+        // Parse the input file
+        Parser parser = parse(inputFile);
+
+        // Scan the input file to get the input word without changing terminals for the parse tree
+        List<Symbol> inputWord = scan(inputFile).get(1);
+
+        // Build the parse tree using the parser and input word
+        ParseTree parseTree = parser.buildParseTree(contextFreeGrammar, inputWord);
+
+        // Write the parse tree to a LaTeX file called filename.tex
+        try (PrintWriter writer = new PrintWriter(new FileWriter(OUTPUT_DIRECTORY + filename))) {
+            writer.println(parseTree.toLaTeX());
+        } catch (IOException e) {
+            throw new IOException("Error while writing the parse tree in LaTeX. Exiting ...");
         }
     }
 }
