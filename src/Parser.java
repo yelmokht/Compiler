@@ -88,6 +88,7 @@ public class Parser {
                 return false;
             }
         }
+        System.out.println();
         return true;
     }
 
