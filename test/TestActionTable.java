@@ -9,6 +9,9 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
+/**
+ * Test class for the action table.
+ */
 public class TestActionTable {
 
     @Test
@@ -33,7 +36,7 @@ public class TestActionTable {
             parseTools.constructLL1ActionTable(contextFreeGrammar);
 
             String actualActionTableFilePath = "test/resources/action_table/actual/action_table_" + file.getName();
-            parseTools.printActionTable(contextFreeGrammar, actualActionTableFilePath);
+            parseTools.writeActionTable(contextFreeGrammar, actualActionTableFilePath);
             assertTrue("The file does not exist", new File(actualActionTableFilePath).isFile());
 
             List<String> outputLines = Files.readAllLines(Paths.get(actualActionTableFilePath));

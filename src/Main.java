@@ -10,8 +10,7 @@ import java.util.List;
  * Ensures also that the command is correctly written and handles errors.
  */
 public class Main {
-    private static final String INPUT_DIRECTORY = "src/resources/";
-    private static final String OUTPUT_DIRECTORY = "src/resources/";
+    private static final String RESOURCES_DIRECTORY = "src/resources/";
 
     public static void main(String[] args) throws IOException {
         if (args.length < 1 || args.length > 3) {
@@ -79,7 +78,7 @@ public class Main {
      * @throws IOException If there is an error reading the input file.
      */
     private static Parser parse(String inputFile) throws IOException {
-        ContextFreeGrammar contextFreeGrammar = new ContextFreeGrammar(INPUT_DIRECTORY + "CFG.pmp");
+        ContextFreeGrammar contextFreeGrammar = new ContextFreeGrammar(RESOURCES_DIRECTORY + "cfg.pmp");
 
         // Check if the grammar is LL(1)
         ParseTools parseTools = new ParseTools();
@@ -91,10 +90,10 @@ public class Main {
         String[][] actionTable = parseTools.constructLL1ActionTable(contextFreeGrammar);
 
         // Save sets and action table for debugging
-        parseTools.printFirstKSets(OUTPUT_DIRECTORY + "first_k_sets.pmp");
-        parseTools.printFollowKSets(OUTPUT_DIRECTORY + "follow_k_sets.pmp");
-        parseTools.printFirstKAlphaFollowKA(OUTPUT_DIRECTORY + "first_k_alpha_follow_k_A.pmp");
-        parseTools.printActionTable(contextFreeGrammar, OUTPUT_DIRECTORY + "action_table_LL1.pmp");
+        parseTools.writeFirstKSets("first_k_sets.txt");
+        parseTools.writeFollowKSets("follow_k_sets.txt");
+        parseTools.writeFirstKAlphaFollowKA("first_k_alpha_follow_k_A.txt");
+        parseTools.writeActionTable(contextFreeGrammar, "action_table_LL1.txt");
 
         // Scan the input file
         List<Symbol> inputWord = scan(inputFile).get(0); // We need the input word with terminals changed for the action table
@@ -115,7 +114,7 @@ public class Main {
      * @throws IOException If there is an error reading the input file or writing the parse tree file.
      */
     private static void parseAndBuildParseTree(String inputFile, String filename) throws IOException {
-        ContextFreeGrammar contextFreeGrammar = new ContextFreeGrammar(INPUT_DIRECTORY + "CFG.pmp");
+        ContextFreeGrammar contextFreeGrammar = new ContextFreeGrammar(RESOURCES_DIRECTORY + "cfg.pmp");
 
         // Parse the input file
         Parser parser = parse(inputFile);
@@ -127,7 +126,7 @@ public class Main {
         ParseTree parseTree = parser.buildParseTree(contextFreeGrammar, inputWord);
 
         // Write the parse tree to a LaTeX file called filename.tex
-        try (PrintWriter writer = new PrintWriter(new FileWriter(OUTPUT_DIRECTORY + filename))) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
             writer.println(parseTree.toLaTeX());
         } catch (IOException e) {
             throw new IOException("Error while writing the parse tree in LaTeX. Exiting ...");

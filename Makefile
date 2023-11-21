@@ -2,17 +2,26 @@ JAVA = java
 JAVAC = javac
 JFLEX = jflex
 JAR = jar
+JAVADOC = javadoc
 JAR_NAME = part2.jar
-SRC_DIR = src
-BUILD_DIR = out/production/Compiler
 JAR_DIR = dist
-INPUT_FILE = sourceFile.pmp
-OUTPUT_FILE = sourceFile.tex
+DOC_DIR = doc
+LIB_DIR = lib
+JAVADOC_DIR = doc/javadoc
+BUILD_DIR = out/production/Compiler
+SRC_DIR = src
+TEST_DIR = test
+TEST_RESOURCES_DIR = test/resources/parser/input
+INPUT_FILE = src/resources/euclid.pmp
+OUTPUT_FILE = filename.tex
 
-lex: $(SRC_DIR)/LexicalAnalyzer.flex
+javadoc: $(SRC_DIR)/*.java
+	$(JAVADOC) -private $(SRC_DIR)/*.java -d $(JAVADOC_DIR)
+
+jflex: $(SRC_DIR)/LexicalAnalyzer.flex
 	$(JFLEX) $(SRC_DIR)/LexicalAnalyzer.flex
 
-compile: lex
+compile: jflex
 	$(JAVAC) -d $(BUILD_DIR) -cp $(BUILD_DIR) $(SRC_DIR)/*.java
 
 parse_only: compile
@@ -30,9 +39,19 @@ launch_parse_only: jar
 launch_parse_and_build_tree: jar
 	$(JAVA) -jar $(JAR_DIR)/$(JAR_NAME) -wt $(OUTPUT_FILE) $(INPUT_FILE)
 
-all: parse_and_build_tree
+testing:
+	for testFile in $(TEST_RESOURCES_DIR)/*.pmp ; do \
+		echo "\nTest file:" $$testFile ; \
+		$(JAVA) -jar $(JAR_DIR)/$(JAR_NAME) $$testFile ; \
+		echo "" ; \
+	done
+
+zip:
+	zip -r $(JAR_DIR) $(DOC_DIR) $(LIB_DIR) $(SRC_DIR) $(TEST_DIR) Makefile README.md
+
+all: launch_parse_and_build_tree
 
 .PHONY: clean
 
 clean:
-	rm -rf $(JAR_DIR)/$(JAR_NAME) $(BUILD_DIR)/*
+	rm -rf $(JAVADOC_DIR)/* $(JAR_DIR)/$(JAR_NAME) $(BUILD_DIR)/* *.txt *.tex

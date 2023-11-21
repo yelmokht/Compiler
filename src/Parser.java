@@ -3,8 +3,8 @@ import java.util.List;
 import java.util.Stack;
 
 /**
- * Parser class is a recursive descent LL(k) parser that parses a given input file according to its action table and
- * its CFG.
+ * Parser class is a recursive descent LL(1) parser that parses a given input file according to its action table and
+ * its context-free grammar.
  */
 public class Parser {
     private final ParseTools parseTools;
@@ -86,25 +86,22 @@ public class Parser {
                 return false;
             }
         }
-
         return true;
     }
 
     /**
      * Initiates the parsing process by calling the recursive parsing function with initial parameters.
-     *
      * @param contextFreeGrammar An LL(1) Context-Free Grammar.
-     * @param actionTable        The action table of the Context-Free Grammar.
-     * @param inputWord          The input word to be parsed.
-     * @return                   True if the input word is a valid part of the grammar.
-     *                           False if the input word is not part of the grammar.
+     * @param actionTable The action table of the Context-Free Grammar.
+     * @param inputWord The input word to be parsed.
+     * @return True if the input word is a valid part of the grammar.
+     *         False if the input word is not part of the grammar.
      */
     public boolean parse(ContextFreeGrammar contextFreeGrammar, String[][] actionTable, List<Symbol> inputWord) {
         // Initialize the stack with the start symbol and the index to the first symbol in the input word
         Stack<Symbol> stack = new Stack<>();
         stack.push(contextFreeGrammar.getStartSymbol());
         int j = 1;
-
         // Call the recursive parsing function with initial parameters
         return parseRecursive(contextFreeGrammar, actionTable, inputWord, stack, j);
     }
@@ -130,7 +127,6 @@ public class Parser {
 
     /**
      * Recursively builds a parse tree for a given input.
-     *
      * @param contextFreeGrammar The context-free grammar to use for parsing.
      * @param stack The stack of symbols
      * @param inputWord The input

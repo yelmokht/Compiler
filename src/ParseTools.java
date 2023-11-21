@@ -6,7 +6,7 @@ import java.util.*;
 
 /**
  * ParseTools class contains all the tools related to grammars
- * such as Firstk, Followk, Firstk(alphaFollowk(A)), LL(k) definition and LL(1) action table
+ * such as Firstk, Followk, Firstk(alphaFollowk(A)), LL(k) definition and LL(1) action table.
  */
 public class ParseTools {
 
@@ -18,7 +18,6 @@ public class ParseTools {
     private String[][] actionTable;
 
     public ParseTools(){}
-
 
     public Map<Symbol, Set<Symbol>> getFirstKSets() {
         return firstKSets;
@@ -88,7 +87,7 @@ public class ParseTools {
 
     /**
      * Computes the First sets using First sets algorithm
-     * foreach A → X1 X2 ... Xn ∈ P do :
+     * <br> foreach A → X1 X2 ... Xn ∈ P do : <br>
      * Firstk(A) ← Firstk(A) ∪ (Firstk(X1) ⊙k Firstk(X2) ⊙k ... ⊙k Firstk(Xn))
      * @param contextFreeGrammar The context-free grammar
      * @param k The parameter k in Firstk
@@ -123,7 +122,7 @@ public class ParseTools {
 
     /**
      * Computes the Follow sets using Follow sets algorithm
-     * foreach A → αBβ ∈ P do :
+     * <br> foreach A → αBβ ∈ P do : <br>
      * Followk(B) ← Followk(B) ∪ (Firstk(β) ⊙k Followk(A))
      * @param contextFreeGrammar The context-free grammar
      * @param k The parameter k in Followk
@@ -191,6 +190,7 @@ public class ParseTools {
 
     /**
      * Checks that the grammar is LL(k) using the definition of Strong LL(K) :
+     * <p></p>
      * FirstK(alphaFollowK(A)) for all pairs of rules A -> alpha
      * @param contextFreeGrammar The context-free grammar
      * @param k The parameter k in LL(k)
@@ -234,7 +234,7 @@ public class ParseTools {
      * @return The action table
      */
     public String[][] constructLL1ActionTable(ContextFreeGrammar contextFreeGrammar){
-        /* Initialize action table */
+        // Initialize action table
         List<Symbol> T = contextFreeGrammar.getTerminals();
         List<Symbol> V = contextFreeGrammar.getVariables();
         List<Symbol> VAndT = contextFreeGrammar.getVariablesAndTerminals();
@@ -255,10 +255,7 @@ public class ParseTools {
             actionTable[VAndT.indexOf(a)][T.indexOf(a)] = "M";
         }
 
-        Symbol terminal = contextFreeGrammar.getRules().get(1).getRightHandSide().getLast();
-        //actionTable[VAndT.indexOf(terminal)][T.indexOf(terminal)] = "A";
-
-        /* Add Produce actions */
+        // Add Produce actions
         for (Rule rule : P) {
             Symbol A = rule.getLeftHandSide();
             List<Symbol> alpha = new ArrayList<>(rule.getRightHandSide());
@@ -279,42 +276,54 @@ public class ParseTools {
         return actionTable;
     }
 
-    public void printFirstKSets(String filePath) {
+    /**
+     * Writes the Firstk sets in a file
+     * @param filePath The path to the file where the Firstk sets will be printed
+     */
+    public void writeFirstKSets(String filePath) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
             for (Symbol variable : firstKSets.keySet()) {
                 writer.println("First1(" + variable.getValue() + ") = " + firstKSets.get(variable));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error while writing the First sets in file " + filePath);
         }
     }
 
-    public void printFollowKSets(String filePath) {
+    /**
+     * Writes the Followk sets in a file
+     * @param filePath The path to the file where the Followk sets will be printed
+     */
+    public void writeFollowKSets(String filePath) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
             for (Symbol variable : followKSets.keySet()) {
                 writer.println("Follow1(" + variable.getValue() + ") = " + followKSets.get(variable));
             }
-            //System.out.println("Content written to file successfully to : " + filePath + ")");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error while writing the Follow sets in file " + filePath);
         }
     }
 
-    public void printFirstKAlphaFollowKA(String filePath) {
+    /**
+     * Writes the Firstk(alphaFollow(A)) sets in a file
+     * @param filePath The path to the file where the Firstk(alphaFollow(A)) sets will be printed
+     */
+    public void writeFirstKAlphaFollowKA(String filePath) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
             for (List<Symbol> alphaFollowKA : firstKAlphaFollowKASets.keySet()) {
                 writer.println("First1(" + alphaFollowKA + ") = " + firstKAlphaFollowKASets.get(alphaFollowKA));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error while writing the Firstk(alphaFollow(A)) sets in file " + filePath);
         }
     }
 
     /**
-     * Prints the LL(1) action table on the standard output
+     * Writes the action table in a file
      * @param contextFreeGrammar The context-free grammar
+     * @param filePath The path to the file where the action table will be printed
      */
-    public void printActionTable(ContextFreeGrammar contextFreeGrammar, String filePath) {
+    public void writeActionTable(ContextFreeGrammar contextFreeGrammar, String filePath) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
             int maxAlphabetLength = contextFreeGrammar.getVariablesAndTerminals().stream().map(symbol -> symbol.getValue().toString().length()).max(Integer::compare).orElse(0);
             int maxTerminalsLength = contextFreeGrammar.getTerminals().stream().map(symbol -> symbol.getValue().toString().length()).max(Integer::compare).orElse(0);

@@ -8,26 +8,15 @@ import java.util.Map;
 
 /**
  * Represents a context-free grammar with variables, terminals, rules, and a start symbol.
- * <p></p>
- * Each rule must follow the format [ruleNumber] <variable> → <symbol1> <variable1> <symbol2> <variable2> ...,
- * where [ruleNumber] is the rule number, <variable1>, <variable2> are variables symbols, and <symbol1>,
- * <symbol2>, etc., are terminals symbols.
- * <p></p>
  * The start symbol is the left-hand side of the first rule. Variables are the left-hand sides
  * of all rules. Terminals are symbols on the right-hand side but not on the left-hand side.
  * Variables and terminals include symbols from both sides of all rules.
  * <p></p>
- * Rules, variables, and terminals are read from a file specified Main.
- * The file must adhere to the specified format.
+ * Rules, variables, and terminals are read from a file specified in Main.
+ * The file must adhere to the specified format. The format can be found in Format class.
  */
 
 public class ContextFreeGrammar {
-    private static final String LEFT_BRACKET = "[";
-    private static final String RIGHT_BRACKET = "]";
-    private static final String START_VARIABLE = "<";
-    private static final String FINISH_VARIABLE = ">";
-    private static final String ARROW = "→";
-    private static final String DELIMITER = " ";
     private final List<Symbol> variables = new ArrayList<>();
     private final List<Symbol> terminals = new ArrayList<>();
     private final List<Symbol> variablesAndTerminals = new ArrayList<>();
@@ -90,34 +79,23 @@ public class ContextFreeGrammar {
     /**
      * Sets up the context-free grammar by reading rules from the specified file.
      * <p></p>
-     * This method initializes the grammar by parsing rules from the provided file. The file
-     * should adhere to a specific format where each rule follows the pattern:
-     * <p></p>
-     *   [ruleNumber] <variable> → <symbol1> <symbol2> ...
-     * <p></p>
-     * Here, [ruleNumber] is the unique identifier for the rule, <variable> is a variable symbol,
-     * and <symbol1>, <symbol2>, etc., represent the sequence of terminals and/or non-terminals on
-     * the right-hand side of the rule.
-     * <p></p>
-     * The method extracts variables, terminals, and rules from the file and populates the corresponding
-     * data structures in the grammar object. It also determines the start symbol, which is the left-hand
-     * side of the first rule in the file.
-     *
+     * This function initializes the grammar by parsing rules from the provided file. The file
+     * should adhere to a specific format in order to be parsed correctly. The format can be found in Format class.
      * @param file The path to the file containing the grammar rules.
      * @throws IOException If an I/O error occurs while reading the file.
      */
     public void setupGrammar(String file) throws IOException {
             for (String line : Files.readAllLines(Path.of(file))) {
-                int number = Integer.parseInt(line.substring(line.indexOf(LEFT_BRACKET) + 1, line.indexOf(RIGHT_BRACKET)));
-                String leftHandSideString = line.substring(line.indexOf(RIGHT_BRACKET) + 2, line.indexOf(ARROW) - 1);
-                String rightHandSideString = line.substring(line.indexOf(ARROW) + 2);
+                int number = Integer.parseInt(line.substring(line.indexOf(Format.LEFT_BRACKET) + 1, line.indexOf(Format.RIGHT_BRACKET)));
+                String leftHandSideString = line.substring(line.indexOf(Format.RIGHT_BRACKET) + 2, line.indexOf(Format.ARROW) - 1);
+                String rightHandSideString = line.substring(line.indexOf(Format.ARROW) + 2);
                 Symbol leftHandSide = new Symbol(LexicalUnit.VARIABLE, leftHandSideString);
                 addVariable(leftHandSide); // Set list of variables
                 List<Symbol> rightHandSide = new ArrayList<>();
 
-                for (String value : rightHandSideString.split(DELIMITER)) {
+                for (String value : rightHandSideString.split(Format.DELIMITER)) {
 
-                    if (value.contains(START_VARIABLE) && value.contains(FINISH_VARIABLE)) {
+                    if (value.contains(Format.START_VARIABLE) && value.contains(Format.FINISH_VARIABLE)) {
                         Symbol variable = new Symbol(LexicalUnit.VARIABLE, value);
                         rightHandSide.add(variable);
 
