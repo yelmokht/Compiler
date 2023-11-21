@@ -100,11 +100,15 @@ public class Symbol {
 		String value = this.getValue().toString();
 
 		// Replace special character terminal with their LaTeX equivalents
-		return switch (value) {
-			case Format.EPSILON -> Format.EPSILON_LATEX;
-			case Format.SMALLER -> Format.SMALLER_LATEX;
-			default -> value;
-		};
+		switch (value) {
+			case Format.EPSILON:
+				return Format.EPSILON_LATEX;
+			case Format.SMALLER:
+				return Format.SMALLER_LATEX;
+			default:
+				return value;
+		}
+
 	}
 
 	@Override

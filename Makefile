@@ -39,7 +39,7 @@ launch_parse_only: jar
 launch_parse_and_build_tree: jar
 	$(JAVA) -jar $(JAR_DIR)/$(JAR_NAME) -wt $(OUTPUT_FILE) $(INPUT_FILE)
 
-testing:
+testing: jar
 	for testFile in $(TEST_RESOURCES_DIR)/*.pmp ; do \
 		echo "\nTest file:" $$testFile ; \
 		$(JAVA) -jar $(JAR_DIR)/$(JAR_NAME) $$testFile ; \

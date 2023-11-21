@@ -53,11 +53,13 @@ public class Parser {
                 stack.pop();
 
                 // Push(alpha) onto the stack
-                for (Symbol symbol : alpha.reversed()) {
+                for (int i = alpha.size() - 1; i >= 0; i--) {
+                    Symbol symbol = alpha.get(i);
                     if (!symbol.equals(ParseTools.EPSILON)) {
                         stack.push(symbol);
                     }
                 }
+
 
                 // Print(i) in the leftmost derivation
                 leftMostDerivation.add(ruleNumber);
@@ -167,7 +169,8 @@ public class Parser {
 
                 // Create a new stack with the right-hand side of the rule
                 Stack<Symbol> newStack = new Stack<>();
-                for (Symbol s : symbols.reversed()) {
+                for (int i = symbols.size() - 1; i >= 0; i--) {
+                    Symbol s = symbols.get(i);
                     newStack.push(s);
                 }
 
