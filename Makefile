@@ -46,9 +46,6 @@ testing:
 		echo "" ; \
 	done
 
-zip:
-	zip -r $(JAR_DIR) $(DOC_DIR) $(LIB_DIR) $(SRC_DIR) $(TEST_DIR) Makefile README.md
-
 all: launch_parse_and_build_tree
 
 .PHONY: clean
