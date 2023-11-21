@@ -1,0 +1,13 @@
+[1] <S> → <Exp> $
+[2] <Exp> → <Prod> <Exp′>
+[3] <Exp′> → + <Prod> <Exp′>
+[4] <Exp′> → − <Prod> <Exp′>
+[5] <Exp′> → ε
+[6] <Prod> → <Atom> <Prod′>
+[7] <Prod′> → ∗ <Atom> <Prod′>
+[8] <Prod′> → / <Atom> <Prod′>
+[9] <Prod′> → ε
+[10] <Atom> → − <Atom>
+[11] <Atom> → Cst
+[12] <Atom> → Id
+[13] <Atom> → ( <Exp> )

@@ -1,12 +1,20 @@
-This folder contains an executable JAR called part1.jar.
-The command for running the executable is the following:
+This folder contains an executable JAR called part2.jar.
+The commands for running the executable are the following:
 
 ```bash
-java -jar part1.jar sourceFile.pmp
+java -jar part2.jar sourceFile.pmp
 ```
 
-Alternatively, you can use the command provided in the Makefile:
+```bash
+java -jar part2.jar -wt sourceFile.tex sourceFile.pmp
+```
+
+Alternatively, you can use these commands provided in the Makefile:
 
 ```bash
-make launch
+make launch_parse_only
+```
+
+```bash
+make launch_parse_and_build_tree
 ```

@@ -1,3 +1,6 @@
+/**
+ * Enum representing different types of lexical units.
+ */
 public enum LexicalUnit{
     VARNAME,
     NUMBER,
@@ -24,5 +27,7 @@ public enum LexicalUnit{
     DO,
     PRINT,
     READ,
+    VARIABLE,
+    TERMINAL,
     EOS
 }
