@@ -51,4 +51,4 @@ all: launch_parse_and_build_tree
 .PHONY: clean
 
 clean:
-	rm -rf $(JAVADOC_DIR)/* $(JAR_DIR)/$(JAR_NAME) $(BUILD_DIR)/* *.txt *.tex
+	rm -rf $(JAVADOC_DIR)/* $(JAR_DIR)/$(JAR_NAME) $(BUILD_DIR) *.txt *.tex
