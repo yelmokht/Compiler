@@ -1,7 +1,7 @@
-# Compiler - Part 2: Project on Language Theory and Compiling (INFO-F403)
+# Compiler - Part 3: Project on Language Theory and Compiling (INFO-F403)
 
 This project aims to build a compiler for PASCALMAISPRESQUE, a simple imperative language.
-In this second part, we implemented the parser using JFlex.
+In this third and last part, we generated LLVM code that corresponds to the semantics of the PASCALmaispresque program.
 
 
 # Compilation
