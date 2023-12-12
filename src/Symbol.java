@@ -105,6 +105,10 @@ public class Symbol {
 				return Format.EPSILON_LATEX;
 			case Format.SMALLER:
 				return Format.SMALLER_LATEX;
+			case Format.LBRACK:
+				return Format.LBRACK_LATEX;
+			case Format.RBRACK:
+				return Format.RBRACK_LATEX;
 			default:
 				return value;
 		}
