@@ -9,8 +9,6 @@ build: jflex
 	javadoc -private src/*.java -d doc/javadoc
 
 testing:
-#	java -jar dist/part2.jar -wt /tmp/EuclidParseTree.tex test/00-euclid.pmp
-#	pdflatex -output-directory /tmp /tmp/EuclidParseTree.tex
 	for testFile in test/*.pmp ; do \
 		echo "\nTest file:" $$testFile ; \
 		java -jar dist/part2.jar -wt /tmp/$$(basename $$testFile .pmp).tex $$testFile ; \
@@ -22,3 +20,6 @@ testing:
 	done
 
 all: build testing
+
+clean:
+	rm -rf more/* dist/part3.jar doc/javadoc/* test-out/*.pdf *.txt
