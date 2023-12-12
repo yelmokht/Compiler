@@ -33,6 +33,11 @@ public class Format {
     public static final String SMALLER = "<";
     public static final String SMALLER_LATEX = "\\textless ";
 
+    public static final String LBRACK = "{";
+    public static final String LBRACK_LATEX = "\\texttt{\\{} ";
+    public static final String RBRACK = "}";
+    public static final String RBRACK_LATEX = "\\texttt{\\}} ";
+
     // If another special character is needed for a different grammar with different characters, it can be added here
     // If the format of the grammar is different, it can be changed here
 }
