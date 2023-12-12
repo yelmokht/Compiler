@@ -10,7 +10,7 @@ import java.util.List;
  * Ensures also that the command is correctly written and handles errors.
  */
 public class Main {
-    private static final String RESOURCES_DIRECTORY = "src/resources/";
+    private static final String RESOURCES_DIRECTORY = "src/";
 
     public static void main(String[] args) throws IOException {
         if (args.length < 1 || args.length > 3) {
@@ -46,8 +46,12 @@ public class Main {
         FileReader fileReader = new FileReader(inputFile);
         LexicalAnalyzer lexicalAnalyzer = new LexicalAnalyzer(fileReader);
 
-        while (!lexicalAnalyzer.yyatEOF()) {
+        while (true) {
             Symbol symbol = lexicalAnalyzer.nextToken();
+            if (symbol.getType() == LexicalUnit.EOS) {
+                break;  // Exit the loop when EOS is encountered
+            }
+        
             if (symbol.getValue() != null) {
                 if (symbol.getType() == LexicalUnit.NUMBER) {
                     input1.add(new Symbol(LexicalUnit.TERMINAL, "[Number]"));
@@ -57,10 +61,13 @@ public class Main {
                     symbol.setType(LexicalUnit.TERMINAL);
                     input1.add(symbol);
                 }
+        
                 symbol.setType(LexicalUnit.TERMINAL);
                 input2.add(symbol);
             }
         }
+        
+
         inputsList.add(input1); // With terminals changed (ex: 0 -> [Number] and x -> [VarName])
         inputsList.add(input2); // Without terminals changed (ex: 0 -> 0 and x -> x)
         fileReader.close();
