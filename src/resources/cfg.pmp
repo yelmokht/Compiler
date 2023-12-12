@@ -2,7 +2,7 @@
 [2] <Code> → <InstList>
 [3] <Code> → ε
 [4] <InstList> → <Instruction> <InstList'>
-[5] <InstList'> → ... <InstList>
+[5] <InstList'> → ... <Instruction> <InstList'>
 [6] <InstList'> → ε
 [7] <Instruction> → <Assign>
 [8] <Instruction> → <If>
@@ -20,19 +20,19 @@
 [20] <ExprProd'> → / <Term> <ExprProd'>
 [21] <ExprProd'> → ε
 [22] <Term> → - <Term>
-[23] <Term> → ( <Term> )
+[23] <Term> → ( <ExprArith> )
 [24] <Term> → [VarName]
 [25] <Term> → [Number]
 [26] <If> → if <Cond> then <Instruction> else <If'>
 [27] <If'> → <Instruction>
 [28] <If'> → ε
 [29] <Cond> → <CondConj> <Cond'>
-[30] <Cond> → { <Cond> }
-[31] <Cond'> → or <CondConj> <Cond'>
-[32] <Cond'> → ε
-[33] <CondConj> → <SimpleCond> <CondConj'>
-[34] <CondConj'> → and <SimpleCond> <CondConj'>
-[35] <CondConj'> → ε
+[30] <Cond'> → or <CondConj> <Cond'>
+[31] <Cond'> → ε
+[32] <CondConj> → <SimpleCond> <CondConj'>
+[33] <CondConj'> → and <SimpleCond> <CondConj'>
+[34] <CondConj'> → ε
+[35] <SimpleCond> → { <Cond> }
 [36] <SimpleCond> → <ExprArith> <Comp> <ExprArith>
 [37] <Comp> → =
 [38] <Comp> → <
