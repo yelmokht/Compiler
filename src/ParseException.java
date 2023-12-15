@@ -1,6 +1,5 @@
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * Exception to be raised when the parsing fails.
