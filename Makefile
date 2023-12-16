@@ -13,10 +13,10 @@ build: jflex
 testing:
 	for testFile in test/*.pmp ; do \
 		echo "\nTest file:" $$testFile ; \
-		java -jar dist/part2.jar -wt /tmp/$$(basename $$testFile .pmp).tex $$testFile ; \
+		java -jar dist/part3.jar -wt /tmp/$$(basename $$testFile .pmp).tex $$testFile ; \
 		echo "\tCompiling tree figure $$(basename $$testFile .pmp).tex... \c"; \
 		pdflatex -interaction=nonstopmode -output-directory /tmp /tmp/$$(basename $$testFile .pmp).tex $$testFile > /dev/null ; \
-		mv /tmp/$$(basename $$testFile .pmp).pdf test-out/ ; \
+		mv /tmp/$$(basename $$testFile .pmp).pdf test-out2/ ; \
 		echo "Done"; \
 		echo "" ; \
 	done
@@ -24,10 +24,10 @@ testing:
 all: build testing
 
 test: build
-	java -jar dist/part3.jar -wt /tmp/tmp1.tex test/02-IfThenElse.pmp;
-	echo "Compiling tree figure tmp1.tex..."
-	@pdflatex -interaction=nonstopmode -output-directory /tmp /tmp/tmp1.tex 02-IfThenElse.pmp > /dev/null
-	@mv /tmp/tmp1.pdf ./
+	java -jar dist/part3.jar -wt /tmp/tmp2.tex test/02-IfThen2.pmp;
+	echo "Compiling tree figure tmp2.tex..."
+	@pdflatex -interaction=nonstopmode -output-directory /tmp /tmp/tmp2.tex 02-IfThen2.pmp > /dev/null
+	@mv /tmp/tmp2.pdf ./
 	@echo "Done"
 	@echo ""
 

@@ -43,17 +43,7 @@ public class AST {
                             children.add(grandchild);
                         }
                         break;
-                    case "ExprArith":
-                        for (ParseTree grandchild : generateAST(child)) {
-                            children.add(grandchild);
-                        }
-                        break;
                     case "ExprArith'":
-                        for (ParseTree grandchild : generateAST(child)) {
-                            children.add(grandchild);
-                        }
-                        break;
-                    case "Prod":
                         for (ParseTree grandchild : generateAST(child)) {
                             children.add(grandchild);
                         }
@@ -74,11 +64,6 @@ public class AST {
                         }
                         break;
                     case "Conj'":
-                        for (ParseTree grandchild : generateAST(child)) {
-                            children.add(grandchild);
-                        }
-                        break;
-                    case "Comp":
                         for (ParseTree grandchild : generateAST(child)) {
                             children.add(grandchild);
                         }

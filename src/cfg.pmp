@@ -11,14 +11,14 @@
 [11] <Instruction> → <Read>
 [12] <Instruction> → begin <InstList> end
 [13] <Assign> → [VarName] := <ExprArith>
-[14] <ExprArith> → <ExprProd> <ExprArith'>
-[15] <ExprArith'> → + <ExprProd> <ExprArith'>
-[16] <ExprArith'> → - <ExprProd> <ExprArith'>
+[14] <ExprArith> → <Prod> <ExprArith'>
+[15] <ExprArith'> → + <Prod> <ExprArith'>
+[16] <ExprArith'> → - <Prod> <ExprArith'>
 [17] <ExprArith'> → ε
-[18] <ExprProd> → <Term> <ExprProd'>
-[19] <ExprProd'> → * <Term> <ExprProd'>
-[20] <ExprProd'> → / <Term> <ExprProd'>
-[21] <ExprProd'> → ε
+[18] <Prod> → <Term> <Prod'>
+[19] <Prod'> → * <Term> <Prod'>
+[20] <Prod'> → / <Term> <Prod'>
+[21] <Prod'> → ε
 [22] <Term> → - <Term>
 [23] <Term> → ( <ExprArith> )
 [24] <Term> → [VarName]
