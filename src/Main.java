@@ -64,11 +64,12 @@ public class Main{
             if (fullOutput) {parser.displayFullRules();}
             try {
                 parseTree = parser.parse();
+                AST ast = new AST(parseTree);
                 //transformer le parsetree en ast
                 //LLVM llvm = new LLVM(ast);
                 //llvm.generateCode();
                 //llvm.printCode();
-                if (writeTree) {tex=parseTree.toLaTeX();};
+                if (writeTree) {tex=ast.toLaTeX();};
             } catch (ParseException e) {
                 System.out.println("Error:> " + e.getMessage());
             } catch (Exception e) {

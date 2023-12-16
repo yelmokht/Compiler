@@ -1,6 +1,36 @@
-program
-begin 
-code
-end
+VARIABLE:
 
-not instlist instlisttail 
+program
+code
+Assign
+if
+cond
+instruction
+instruction2
+Conj
+SimpleCond
+While
+Print
+Read
+
+not instlist instlisttail ExprArith ExprArith' ExprProd' Cond' CondConj' Comp
+
+TERMINAL
+begin 
+end
+:= (stored in memory location)
+VarName
++
+-
+/
+- unary
+(
+)
+Number
+if
+then
+else
+or
+and
+
+no {}

@@ -83,6 +83,14 @@ public class ParseTree {
         this.children = chdn;
     }
 
+    public List<ParseTree> getChildren() {
+        return this.children;
+    }
+
+    public Symbol getLabel() {
+        return this.label;
+    }
+
     /* Pure LaTeX version (using the forest package) */
     /**
      * Writes the tree as LaTeX code.
