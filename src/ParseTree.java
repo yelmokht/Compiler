@@ -20,7 +20,7 @@ public class ParseTree {
     /**
      * The list of childrens of the root node, which are trees themselves.
      */
-    private List<ParseTree> children;
+    protected List<ParseTree> children;
 
     /**
      * Creates a singleton tree with only a root labeled by lbl.

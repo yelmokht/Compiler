@@ -15,14 +15,14 @@
 [15] <ExprArith'> → + <Prod> <ExprArith'>
 [16] <ExprArith'> → - <Prod> <ExprArith'>
 [17] <ExprArith'> → ε
-[18] <Prod> → <Term> <Prod'>
-[19] <Prod'> → * <Term> <Prod'>
-[20] <Prod'> → / <Term> <Prod'>
+[18] <Prod> → <Atom> <Prod'>
+[19] <Prod'> → * <Atom> <Prod'>
+[20] <Prod'> → / <Atom> <Prod'>
 [21] <Prod'> → ε
-[22] <Term> → - <Term>
-[23] <Term> → ( <ExprArith> )
-[24] <Term> → [VarName]
-[25] <Term> → [Number]
+[22] <Atom> → - <Atom>
+[23] <Atom> → ( <ExprArith> )
+[24] <Atom> → [VarName]
+[25] <Atom> → [Number]
 [26] <If> → if <Cond> then <Instruction> else <If'>
 [27] <If'> → <Instruction>
 [28] <If'> → ε
