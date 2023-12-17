@@ -24,10 +24,10 @@ testing:
 all: build testing
 
 test: build
-	java -jar dist/part3.jar -wt /tmp/tmp2.tex test/02-IfThen2.pmp;
-	echo "Compiling tree figure tmp2.tex..."
-	@pdflatex -interaction=nonstopmode -output-directory /tmp /tmp/tmp2.tex 02-IfThen2.pmp > /dev/null
-	@mv /tmp/tmp2.pdf ./
+	java -jar dist/part3.jar -wt /tmp/tmp6.tex test/06-ExprArithPriorities.pmp
+	echo "Compiling tree figure tmp6.tex..."
+	@pdflatex -interaction=nonstopmode -output-directory /tmp /tmp/tmp6.tex 06-ExprArithPriorities.pmp > /dev/null
+	@mv /tmp/tmp6.pdf ./
 	@echo "Done"
 	@echo ""
 
