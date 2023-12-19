@@ -66,7 +66,7 @@ public class Main{
                 parseTree = parser.parse();
                 AST ast = new AST(parseTree);
                 LLVM llvm = new LLVM(ast);
-                llvm.generateCode(ast);
+                System.out.println("LLVM code:");
                 System.out.print(llvm.getCode());
                 if (writeTree) {tex=ast.toLaTeX();};
             } catch (ParseException e) {

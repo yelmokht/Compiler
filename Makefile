@@ -24,9 +24,9 @@ testing:
 all: build testing
 
 test: build
-	java -jar dist/part3.jar -wt /tmp/tmp6.tex test/06-ExprArithPriorities.pmp
+	java -jar dist/part3.jar -wt /tmp/tmp6.tex test/00-euclid.pmp
 	echo "Compiling tree figure tmp6.tex..."
-	@pdflatex -interaction=nonstopmode -output-directory /tmp /tmp/tmp6.tex 06-ExprArithPriorities.pmp > /dev/null
+	@pdflatex -interaction=nonstopmode -output-directory /tmp /tmp/tmp6.tex 00-euclid.pmp > /dev/null
 	@mv /tmp/tmp6.pdf ./
 	@echo "Done"
 	@echo ""
