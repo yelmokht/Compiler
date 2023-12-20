@@ -6,6 +6,8 @@ public class LLVM {
     private ArrayList<String> namedVariables = new ArrayList<>();
     private ArrayList<String> numberedVariables = new ArrayList<>();
     private ArrayList<String> numbers = new ArrayList<>();
+    private int instructionCounter = 0;
+    private boolean tabulation = false;
 
     public LLVM(AST ast) {
         this.ast = ast;
@@ -74,6 +76,9 @@ public class LLVM {
     public String addNamedVariable(String varname) {
         if(!this.namedVariables.contains(varname)){
             this.namedVariables.add(varname);
+            if (tabulation) {
+            code.append("\t");
+            }
             code.append("%" + varname + " = alloca i32\n");
         }
         return varname;
@@ -111,6 +116,9 @@ public class LLVM {
         String namedVariable = parseTree.getChildren().get(0).getLabel().getValue().toString();
         addNamedVariable(namedVariable);
         String value = exprarith(parseTree.getChildren().get(2)); //<ExprArith>
+        if (tabulation) {
+            code.append("\t");
+        }
         code.append("store i32 " + value + ", i32* %" + namedVariable + "\n"); //MAKE DISTINCION BETWEEN NUMBER AND VARIABLE
         return null;
     }
@@ -199,14 +207,33 @@ public class LLVM {
     public String if_(ParseTree parseTree) {
         if (parseTree.getChildren().size() == 5) {
             String boolValue = cond(parseTree.getChildren().get(1)); //<Cond>
-            code.append("br i1 %" + boolValue + ", label " + myLabelIfTrue + ", label " + myLabelIfFalse + "\n");
-            String myLabelIfTrue = generateCode(parseTree.getChildren().get(3)); //<Instruction>
-            String myLabelIfFalse = "%nextInstruction"; //TODO
+            String myLabelIfTrue = parseTree.getChildren().get(3).getLabel().getValue().toString(); //<Instruction>
+            String myLabelIfFalse = "nextInstruction"; //TODO
+            if (tabulation) {
+            code.append("\t");
+            }
+            code.append("br i1 %" + boolValue + ", label %" + myLabelIfTrue + ", label %" + myLabelIfFalse + "\n");
+            tabulation = true;
+            code.append(myLabelIfTrue + ":\n");
+            generateCode(parseTree.getChildren().get(3)); //<Instruction>
+            code.append(myLabelIfFalse + ":\n");
+            tabulation = false;
         } else {
             String boolValue = cond(parseTree.getChildren().get(1)); //<Cond>
-            String myLabelIfTrue = generateCode(parseTree.getChildren().get(3)); //<Instruction1>
-            String myLabelIfFalse = generateCode(parseTree.getChildren().get(5)); //<Instruction2>
-            code.append("br i1 %" + boolValue + ", label " + myLabelIfTrue + ", label " + myLabelIfFalse + "\n");
+            String myLabelIfTrue = parseTree.getChildren().get(3).getLabel().getValue().toString() + "_" + instructionCounter; //<Instruction1>
+            instructionCounter++;
+            String myLabelIfFalse = parseTree.getChildren().get(5).getLabel().getValue().toString() + "_" + instructionCounter; //<Instruction2>
+            instructionCounter++;
+            if (tabulation) {
+            code.append("\t");
+            }
+            code.append("br i1 %" + boolValue + ", label %" + myLabelIfTrue + ", label %" + myLabelIfFalse + "\n");
+            tabulation = true;
+            code.append(myLabelIfTrue + ":\n");
+            generateCode(parseTree.getChildren().get(3)); //<Instruction1>
+            code.append(myLabelIfFalse + ":\n");
+            generateCode(parseTree.getChildren().get(5)); //<Instruction2>
+            tabulation = false;
         }
         return null;
     }
@@ -288,12 +315,18 @@ public class LLVM {
 
     private String print(ParseTree parseTree) {
         String varname = parseTree.getChildren().get(2).getLabel().getValue().toString();
+        if (tabulation) {
+            code.append("\t");
+        }
         code.append("call void @println(i32 %" + varname + ")");
         return null;
     }
 
     private String read(ParseTree parseTree) {
         String varname = parseTree.getChildren().get(2).getLabel().getValue().toString();
+        if (tabulation) {
+            code.append("\t");
+        }
         code.append("%" + varname + " = call i32 @readInt()");
         return null;
     }

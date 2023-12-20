@@ -24,9 +24,9 @@ testing:
 all: build testing
 
 test: build
-	java -jar dist/part3.jar -wt /tmp/tmp6.tex test/02-IfThen2.pmp
+	java -jar dist/part3.jar -wt /tmp/tmp6.tex test/02-IfThenElse.pmp
 	echo "Compiling tree figure tmp6.tex..."
-	@pdflatex -interaction=nonstopmode -output-directory /tmp /tmp/tmp6.tex 02-IfThen2.pmp > /dev/null
+	@pdflatex -interaction=nonstopmode -output-directory /tmp /tmp/tmp6.tex 02-IfThenElse.pmp > /dev/null
 	@mv /tmp/tmp6.pdf ./
 	@echo "Done"
 	@echo ""
