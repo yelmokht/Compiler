@@ -39,6 +39,11 @@ public class AST extends ParseTree {
                         children.add(grandchild);
                     }
                     break;
+                case "Comp":
+                    for (ParseTree grandchild : generateAST(child)) {
+                        children.add(grandchild);
+                    }
+                    break;
                 case "ExprArith'":
                     for (ParseTree grandchild : generateAST(child)) {
                         children.add(grandchild);

@@ -1,83 +1,102 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class LLVM {
     private AST ast;
     private StringBuilder code = new StringBuilder();
-    private ArrayList<String> variables = new ArrayList<>();
+    private ArrayList<String> namedVariables = new ArrayList<>();
+    private ArrayList<String> numberedVariables = new ArrayList<>();
     private ArrayList<String> numbers = new ArrayList<>();
-    private int varCount = 0;
 
     public LLVM(AST ast) {
         this.ast = ast;
         generateCode(ast);
     }
 
-    public void generateCode(ParseTree parseTree) {
+    public String generateCode(ParseTree parseTree) {
         Symbol current = parseTree.getLabel();
+        String result = null;
         switch (current.getValue().toString()) {
             case "Program":
-                program(parseTree); //OK
+                result = program(parseTree);
                 break;
             case "Code":
-                code(parseTree);
+                result = code(parseTree);
                 break;
             case "InstList":
-                instlist(parseTree);
+                result = instlist(parseTree);
                 break;
             case "Assign":
-                assign(parseTree);
+                result = assign(parseTree);
                 break;
             case "ExprArith":
-                exprarith(parseTree);
+                result = exprarith(parseTree);
                 break;
             case "Prod":
-                prod(parseTree);
+                result = prod(parseTree);
                 break;
             case "Atom":
-                atom(parseTree);
+                result = atom(parseTree);
                 break;
             case "If":
-                processIf(parseTree);
+                result = if_(parseTree);
                 break;
             case "Cond":
-                cond(parseTree);
+                result = cond(parseTree);
                 break;
             case "Conj":
-                conj(parseTree);
+                result = conj(parseTree);
                 break;
             case "SimpleCond":
-                simpleCond(parseTree);
-                break;
-            case "Comp":
-                comp(parseTree);
+                result = simplecond(parseTree);
                 break;
             case "While":
-                whileProcess(parseTree);
+                result = while_(parseTree);
                 break;
             case "Print":
-                print(parseTree);
+                result = print(parseTree);
                 break;
             case "Read":
-                read(parseTree);
+                result = read(parseTree);
                 break;
             default:
                 break;
         }
+        return result;
     }
 
+    public String addNumber(String number) {
+        if(!this.numbers.contains(number)){
+            this.numbers.add(number);
+        }
+        return number;
+    }
 
-    public void program(ParseTree parseTree) {
+    public String addNamedVariable(String varname) {
+        if(!this.namedVariables.contains(varname)){
+            this.namedVariables.add(varname);
+            code.append("%" + varname + " = alloca i32\n");
+        }
+        return varname;
+    }
+
+    public String addNumberedVariable() {
+        numberedVariables.add(String.valueOf(numberedVariables.size() + 1));
+        return numberedVariables.get(numberedVariables.size() - 1);
+    }
+
+    public String program(ParseTree parseTree) {
         code.append("define i32 @main() {\n"); //begin
         generateCode(parseTree.getChildren().get(1)); //<Code>
         code.append("}\n"); //end
+        return null;
     }
 
-    public void code(ParseTree parseTree) {
-        generateCode(parseTree.getChildren().get(0));//<InstList>
+    public String code(ParseTree parseTree) {
+        generateCode(parseTree.getChildren().get(0)); //<InstList>
+        return null;
     }
 
-    public void instlist(ParseTree parseTree) {
+    public String instlist(ParseTree parseTree) {
         for (ParseTree grandchild : parseTree.getChildren()) {
             if (grandchild.getLabel().isTerminal()) {
                 code.append("\n"); //begin, dots and end
@@ -85,192 +104,204 @@ public class LLVM {
                 generateCode(grandchild); //<Instruction>
             }
         }
+        return null;
     }
 
-    public void assign(ParseTree parseTree) {
-        String varname = parseTree.getChildren().get(0).getLabel().getValue().toString();
-        code.append("%" + varname + " = alloca i32\n");
-        generateCode(parseTree.getChildren().get(2)); //<ExprArith>
-        code.append("store i32 %" + (varCount - 1) + ", i32* %" + varname + "\n");
+    public String assign(ParseTree parseTree) {
+        String namedVariable = parseTree.getChildren().get(0).getLabel().getValue().toString();
+        addNamedVariable(namedVariable);
+        String value = exprarith(parseTree.getChildren().get(2)); //<ExprArith>
+        code.append("store i32 " + value + ", i32* %" + namedVariable + "\n"); //MAKE DISTINCION BETWEEN NUMBER AND VARIABLE
+        return null;
     }
 
-    public void exprarith(ParseTree parseTree) {
+    public String exprarith(ParseTree parseTree) {
         int n = parseTree.getChildren().size();
-        for (int j = 0; j < n; j += 3) {
-            int k = j+3 < n ? j+3 : n;
-            for (int i = j; i < k ; i += 2) {
-                ParseTree grandchild = parseTree.getChildren().get(i);
-                generateCode(grandchild);
-            }
-            if (n != 1) {
-                ParseTree grandchild = parseTree.getChildren().get(j+1); //
-                if (grandchild.getLabel().isTerminal()) {
-                    switch (grandchild.getLabel().getType()) {
-                        case PLUS:
-                            code.append("%" + varCount + " = add i32 %" + (varCount - 1) + ", i32 %" + (varCount - 2)+ "\n"); //+
-                            varCount++;
-                            break;
-                        case MINUS:
-                            code.append("%" + varCount + " = sub i32 %" + (varCount - 1) + ", i32 %" + (varCount - 2)+ "\n"); //-
-                            varCount++;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-        }
-    }
-
-    public void prod(ParseTree parseTree) {
-        for (ParseTree grandchild : parseTree.getChildren()) {
-            if (grandchild.getLabel().isTerminal()) {
-                switch (grandchild.getLabel().getType()) {
-                    case TIMES:
-                        code.append("%" + varCount + "mul i32 %" + (varCount - 1) + ", i32 %" + (varCount - 2)+ "\n"); //+
-                        varCount++;
-                        break;
-                    case DIVIDE:
-                        code.append("%" + varCount + "sdiv i32 %" + (varCount - 1) + ", i32 %" + (varCount - 2)+ "\n"); //-
-                        varCount++;
-                        break;
-                    default:
-                        break;
-                }
-            } else {
-                generateCode(grandchild); //<Prod>
-            }
-        }
-    }
-
-    public void atom(ParseTree parseTree) {
-        for (ParseTree grandchild : parseTree.getChildren()) {
-            if (grandchild.getLabel().isTerminal()) {
-                switch (grandchild.getLabel().getType()) {
-                    case MINUS:
-                        //TODO
-                        break;
-                    default:
-                        break;
-                    case VARNAME:
-                        String varName = grandchild.getLabel().getValue().toString();
-                        code.append("%" + varCount + " = load i32, i32* %" + varName + "\n");
-                        varCount++;
-                        break;
-                    case NUMBER:
-                        String number = grandchild.getLabel().getValue().toString();
-                        numbers.add(number);
-                        break;
-                }
-            } else {
-                generateCode(grandchild); //<Atom> or <ExprArith>
-            }
-        }
-    }
-
-    public void processIf(ParseTree parseTree) {
-        if (parseTree.getChildren().size() == 5) { //if cond then instruction else
-            for (ParseTree grandchild : parseTree.getChildren()) {
-                generateCode(grandchild); //<Cond> and <Instruction>
-            }
-            code.append("br i1 %" + (varCount - 2) + ", label %" + (varCount - 1) + ", label %" + varCount + "\n");
-            varCount++;
-        } else { //if cond then instruction else instruction
-            for (ParseTree grandchild : parseTree.getChildren()) {
-                generateCode(grandchild); //<Cond> and <Instruction> and <Instruction2>
-            }
-            code.append("br i1 %" + (varCount - 2) + ", label %" + (varCount - 1) + ", label %" + varCount + "\n");
-        }
-    }
-
-    public void cond(ParseTree parseTree) {
-        for (ParseTree grandchild : parseTree.getChildren()) {
-            if (grandchild.getLabel().isTerminal()) {
-                switch (grandchild.getLabel().getType()) {
-                    case OR:
-                        code.append("%" + varCount + "or i32 %" + (varCount - 1) + ", i32 %" + (varCount - 2)+ "\n"); //or
-                        varCount++;
-                        break;
-                    default:
-                        break;
-                }
-            } else {
-                generateCode(grandchild); //<Conj>
-            }
-        }
-    }
-
-    private void conj(ParseTree parseTree) {
-        for (ParseTree grandchild : parseTree.getChildren()) {
-            if (grandchild.getLabel().isTerminal()) {
-                switch (grandchild.getLabel().getType()) {
-                    case AND:
-                        code.append("%" + varCount + "and i32 %" + (varCount - 1) + ", i32 %" + (varCount - 2)+ "\n"); //and
-                        varCount++;
-                        break;
-                    default:
-                        break;
-                }
-            } else {
-                generateCode(grandchild); //<SimpleCond>
-            }
-        }
-    }
-
-    private void simpleCond(ParseTree parseTree) {
-        if (parseTree.getChildren().get(1).getLabel().toString().equals("Cond")) {
-            generateCode(parseTree.getChildren().get(1)); //<Cond>
+        if (n == 1) {
+            return prod(parseTree.getChildren().get(0));
         } else {
-            generateCode(parseTree.getChildren().get(0)); //<ExprArith>
-            generateCode(parseTree.getChildren().get(2)); //<ExprArith>
-            generateCode(parseTree.getChildren().get(1)); //<Comp>
+            for (int i = 0; i < n; i += 3) {
+                String leftProd = prod(parseTree.getChildren().get(i));
+                String rightProd = prod(parseTree.getChildren().get(i+2));
+                String numberedVariable = "";
+                switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
+                    case PLUS:
+                        numberedVariable = addNumberedVariable();
+                        code.append("%" + numberedVariable + " = add i32 " + leftProd + ", i32 " + rightProd + "\n");
+                        return numberedVariable;
+                    case MINUS:
+                        numberedVariable = addNumberedVariable();
+                        code.append("%" + numberedVariable + " = sub i32 " + leftProd + ", i32 " + rightProd + "\n");
+                        return numberedVariable;
+                    default:
+                        //Throw error
+                        break;
+                }
+            }
         }
+        return null;
+    }
+    public String prod(ParseTree parseTree) {
+        int n = parseTree.getChildren().size();
+        if (n == 1) {
+            return atom(parseTree.getChildren().get(0));
+        } else {
+            for (int i = 0; i < n; i += 3) {
+                String leftAtom = atom(parseTree.getChildren().get(i));
+                String rightAtom = atom(parseTree.getChildren().get(i+2));
+                String numberedVariable = "";
+                switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
+                    case DIVIDE:
+                        numberedVariable = addNumberedVariable();
+                        code.append("%" + numberedVariable + " = sdiv i32 " + leftAtom + ", i32 " + rightAtom + "\n");
+                        return numberedVariable;
+                    case TIMES:
+                        numberedVariable = addNumberedVariable();
+                        code.append("%" + numberedVariable + " = mul i32 " + leftAtom + ", i32 " + rightAtom + "\n");
+                        return numberedVariable;
+                    default:
+                        //Throw error
+                        break;
+                }
+            }
+        }
+        return null;
     }
 
-    private void comp(ParseTree parseTree) {
-        switch (parseTree.getChildren().get(0).getLabel().getType()) {
-            case EQUAL:
-                code.append("%" + varCount + " = icmp eq i32 %" + (varCount - 2) + ", i32 %" + (varCount - 1)+ "\n"); //==
-                varCount++;
+    public String unaryMinus(ParseTree parseTree) {
+        //TODO
+        return null;
+    }
+
+    public String atom(ParseTree parseTree) {
+        ParseTree grandchild = parseTree.getChildren().get(0);
+        String result = "";
+        switch (grandchild.getLabel().getType()) {
+            case MINUS:
+                result = unaryMinus(parseTree);
                 break;
-            case SMALLER:
-                code.append("%" + varCount + " = icmp slt i32 %" + (varCount - 2) + ", i32 %" + (varCount - 1)+ "\n"); //<
-                varCount++;
+            case LPAREN:
+                result = exprarith(parseTree.getChildren().get(1));
+                break;
+            case VARNAME:
+                result = "%" + addNamedVariable(grandchild.getLabel().getValue().toString());
+                break;
+            case NUMBER:
+                result = addNumber(grandchild.getLabel().getValue().toString());
                 break;
             default:
+                //Throw error
                 break;
         }
+        return result;
     }
 
-    private void whileProcess(ParseTree parseTree) {
-        for (ParseTree grandchild : parseTree.getChildren()) {
-            generateCode(grandchild); //<Cond> or <Instruction>
+    public String if_(ParseTree parseTree) {
+        if (parseTree.getChildren().size() == 5) {
+            String boolValue = cond(parseTree.getChildren().get(1)); //<Cond>
+            code.append("br i1 %" + boolValue + ", label " + myLabelIfTrue + ", label " + myLabelIfFalse + "\n");
+            String myLabelIfTrue = generateCode(parseTree.getChildren().get(3)); //<Instruction>
+            String myLabelIfFalse = "%nextInstruction"; //TODO
+        } else {
+            String boolValue = cond(parseTree.getChildren().get(1)); //<Cond>
+            String myLabelIfTrue = generateCode(parseTree.getChildren().get(3)); //<Instruction1>
+            String myLabelIfFalse = generateCode(parseTree.getChildren().get(5)); //<Instruction2>
+            code.append("br i1 %" + boolValue + ", label " + myLabelIfTrue + ", label " + myLabelIfFalse + "\n");
         }
+        return null;
     }
 
-    private void print(ParseTree parseTree) {
-        for (ParseTree grandchild : parseTree.getChildren()) {
-            if (grandchild.getLabel().getType().equals(LexicalUnit.VARNAME)) {
-                String varName = grandchild.getLabel().getValue().toString();
-                code.append("call void @println(i32 %" + varName + ")");
-            } else {
-                //TODO: throw exception
+    public String cond(ParseTree parseTree) {
+        int n = parseTree.getChildren().size();
+        if (n == 1) {
+            return conj(parseTree.getChildren().get(0));
+        } else {
+            for (int i = 0; i < n; i += 3) {
+                String leftConj = conj(parseTree.getChildren().get(i));
+                String rightConj = conj(parseTree.getChildren().get(i+2));
+                String numberedVariable = "";
+                switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
+                    case OR:
+                        numberedVariable = addNumberedVariable();
+                        code.append("%" + numberedVariable + "= or i32 " + leftConj + ", i32 " + rightConj + "\n");
+                        break;
+                    default:
+                        //Throw error
+                        break;
+                }
             }
         }
+        return null;
     }
 
-    private void read(ParseTree parseTree) {
-        for (ParseTree grandchild : parseTree.getChildren()) {;
-            if (grandchild.getLabel().getType().equals(LexicalUnit.VARNAME)) {
-                String varName = grandchild.getLabel().getValue().toString();
-                code.append("%" + varName + " = call i32 @readInt()");
-            } else {
-                //TODO: throw exception
+    private String conj(ParseTree parseTree) {
+        int n = parseTree.getChildren().size();
+        if (n == 1) {
+            return simplecond(parseTree.getChildren().get(0));
+        } else {
+            for (int i = 0; i < n; i += 3) {
+                String leftSimpleCond = simplecond(parseTree.getChildren().get(i));
+                String rightSimpleCond= simplecond(parseTree.getChildren().get(i+2));
+                String numberedVariable = "";
+                switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
+                    case AND:
+                        numberedVariable = addNumberedVariable();
+                        code.append("%" + numberedVariable + "= or i32 " + leftSimpleCond + ", i32 " + rightSimpleCond + "\n");
+                        break;
+                    default:
+                        //Throw error
+                        break;
+                }
             }
         }
+        return null;
+    }
+
+    private String simplecond(ParseTree parseTree) {
+        if (parseTree.getChildren().size() == 1) {
+            cond(parseTree.getChildren().get(1)); //<Cond>
+        } else {
+            String leftComp = generateCode(parseTree.getChildren().get(0));
+            String rightComp = generateCode(parseTree.getChildren().get(2));
+            String numberedVariable = "";
+            switch (parseTree.getChildren().get(1).getLabel().getType()) {
+                case EQUAL:
+                    numberedVariable = addNumberedVariable();
+                    code.append("%" + numberedVariable + " = icmp eq i32 " + leftComp + ", i32 " + rightComp + "\n");
+                    return numberedVariable;
+                case SMALLER:
+                    code.append("%" + numberedVariable + " = icmp slt i32 " + leftComp + ", i32 " + rightComp + "\n");
+                    return numberedVariable;
+                default:
+                    break;
+            }
+        }
+        return null;
+    }
+
+    private String while_(ParseTree parseTree) {
+        for (ParseTree grandchild : parseTree.getChildren()) {
+            generateCode(grandchild);
+        }
+        return null;
+    }
+
+    private String print(ParseTree parseTree) {
+        String varname = parseTree.getChildren().get(2).getLabel().getValue().toString();
+        code.append("call void @println(i32 %" + varname + ")");
+        return null;
+    }
+
+    private String read(ParseTree parseTree) {
+        String varname = parseTree.getChildren().get(2).getLabel().getValue().toString();
+        code.append("%" + varname + " = call i32 @readInt()");
+        return null;
     }
 
     public String getCode() {
+        System.out.println("Named variables: " + namedVariables);
+        System.out.println("Numbered variables: " + numberedVariables);
+        System.out.println("Numbers: " + numbers);
         return code.toString();
     }
 }
