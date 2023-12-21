@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.function.Function;
 
 public class LLVM {
     private AST ast;
@@ -8,6 +7,11 @@ public class LLVM {
     private int numberedVariableCounter = 0;
     private int instructionCounter = 0;
     private int minusCounter = 0;
+    private String ifTrueLabel = "ifTrue_" + instructionCounter;
+    private String ifFalseLabel =  "ifFalse_" + instructionCounter;
+    private String whileLoopLabel = "whileLoop_" + instructionCounter;
+    private String whileBodyLabel = "whileBody_" + instructionCounter;
+    private String WhileEndLabel = "whileEnd_" + instructionCounter;
 
     public LLVM(AST ast) {
         this.ast = ast;
@@ -19,16 +23,16 @@ public class LLVM {
         String result = null;
         switch (current.getValue().toString()) {
             case "Program":
-                result = program(parseTree);
+                program(parseTree);
                 break;
             case "Code":
-                result = code(parseTree);
+                code(parseTree);
                 break;
             case "InstList":
-                result = instlist(parseTree);
+                instlist(parseTree);
                 break;
             case "Assign":
-                result = assign(parseTree);
+                assign(parseTree);
                 break;
             case "ExprArith":
                 result = exprarith(parseTree);
@@ -40,7 +44,7 @@ public class LLVM {
                 result = atom(parseTree);
                 break;
             case "If":
-                result = if_(parseTree);
+                if_(parseTree);
                 break;
             case "Cond":
                 result = cond(parseTree);
@@ -52,13 +56,13 @@ public class LLVM {
                 result = simplecond(parseTree);
                 break;
             case "While":
-                result = while_(parseTree);
+                while_(parseTree);
                 break;
             case "Print":
-                result = print(parseTree);
+                print(parseTree);
                 break;
             case "Read":
-                result = read(parseTree);
+                read(parseTree);
                 break;
             default:
                 break;
@@ -107,17 +111,6 @@ public class LLVM {
             .append("\n");
     }
 
-    public String program(ParseTree parseTree) {
-        addReadFunction();
-        addPrintFunction();
-        code.append("define i32 @main() {\n"); //begin
-        allocateVariables(parseTree);
-        generateCode(parseTree.getChildren().get(1)); //<Code>
-        code.append("ret i32 0\n");
-        code.append("}\n"); //end
-        return null;
-    }
-
     public void allocateVariables(ParseTree parseTree) {
         for (ParseTree grandchild : parseTree.getChildren()) {
             if (!(grandchild.getLabel().getValue().toString().equals("Read") || grandchild.getLabel().getValue().toString().equals("Print"))) {
@@ -130,32 +123,38 @@ public class LLVM {
         }
     }
 
-    public String code(ParseTree parseTree) {
+    public void program(ParseTree parseTree) {
+        addReadFunction();
+        addPrintFunction();
+        code.append("define i32 @main() {\n");
+        allocateVariables(ast);
+        code(parseTree.getChildren().get(1));
+        code.append("ret i32 0\n}\n");
+    }
+
+    public void code(ParseTree parseTree) {
         for (ParseTree grandchild : parseTree.getChildren()) {
             if (grandchild.getLabel().isNonTerminal()) {
-                generateCode(grandchild); //<Instruction>
+                generateCode(grandchild);
             } else {
-                //Throw error
+                throw new RuntimeException("Invalid code");
             }
         }
-        return null;
     }
 
-    public String instlist(ParseTree parseTree) {
+    public void instlist(ParseTree parseTree) {
         for (ParseTree grandchild : parseTree.getChildren()) {
             if (grandchild.getLabel().isNonTerminal()) {
-                generateCode(grandchild); //<Instruction>
+                generateCode(grandchild);
             }
         }
-        return null;
     }
 
-    public String assign(ParseTree parseTree) {
+    public void assign(ParseTree parseTree) {
         String namedVariable = parseTree.getChildren().get(0).getLabel().getValue().toString();
         addNamedVariable(namedVariable);
-        String value = exprarith(parseTree.getChildren().get(2)); //<ExprArith>
+        String value = exprarith(parseTree.getChildren().get(2));
         code.append("store i32 " + value + ", i32* %" + namedVariable + "\n");
-        return null;
     }
 
     public String exprarith(ParseTree parseTree) {
@@ -177,8 +176,7 @@ public class LLVM {
                         code.append(numberedVariable + " = sub i32 " + leftProd + ", " + rightProd + "\n");
                         return numberedVariable;
                     default:
-                        //Throw error
-                        break;
+                        throw new RuntimeException("Invalid exprarith");
                 }
             }
         }
@@ -203,8 +201,7 @@ public class LLVM {
                         code.append(numberedVariable + " = mul i32 " + leftAtom + ", " + rightAtom + "\n");
                         return numberedVariable;
                     default:
-                        //Throw error
-                        break;
+                        throw new RuntimeException("Invalid prod");
                 }
             }
         }
@@ -218,7 +215,7 @@ public class LLVM {
             } else if (grandchild.getLabel().isNonTerminal() && grandchild.getLabel().getValue().equals("Atom")) {
                 unaryMinus(grandchild, minusCounter);
             } else {
-                //Throw error
+                throw new RuntimeException("Invalid unary minus");
             }
         }
         return minusCounter;
@@ -251,37 +248,40 @@ public class LLVM {
                 result = grandchild.getLabel().getValue().toString();
                 break;
             default:
-                //Throw error
-                break;
+                throw new RuntimeException("Invalid atom");
         }
         return result;
     }
 
-    public String if_(ParseTree parseTree) {
-        if (parseTree.getChildren().size() == 5) {
-            String boolValue = cond(parseTree.getChildren().get(1)); //<Cond>
-            String myLabelIfTrue = parseTree.getChildren().get(3).getLabel().getValue().toString(); //<Instruction>
-            String myLabelIfFalse = "nextInstruction"; //TODO
-            code.append("br i1 %" + boolValue + ", label %" + myLabelIfTrue + ", label %" + myLabelIfFalse + "\n");
-            code.append(myLabelIfTrue + ":\n");
-            generateCode(parseTree.getChildren().get(3)); //<Instruction>
-            code.append("ret i32 0\n");
-            code.append(myLabelIfFalse + ":\n");
-        } else {
-            String boolValue = cond(parseTree.getChildren().get(1)); //<Cond>
-            String myLabelIfTrue = parseTree.getChildren().get(3).getLabel().getValue().toString() + "_" + instructionCounter; //<Instruction1>
-            instructionCounter++;
-            String myLabelIfFalse = parseTree.getChildren().get(5).getLabel().getValue().toString() + "_" + instructionCounter; //<Instruction2>
-            instructionCounter++;
-            code.append("br i1 %" + boolValue + ", label %" + myLabelIfTrue + ", label %" + myLabelIfFalse + "\n");
-            code.append(myLabelIfTrue + ":\n");
-            generateCode(parseTree.getChildren().get(3)); //<Instruction1>
-            code.append("ret i32 0\n");
-            code.append(myLabelIfFalse + ":\n");
-            generateCode(parseTree.getChildren().get(5)); //<Instruction2>
-            code.append("ret i32 0\n");
+    public void if_1(ParseTree parseTree) {
+        String boolValue = cond(parseTree.getChildren().get(1)); //<Cond>
+        code.append("br i1 %" + boolValue + ", label %" + ifTrueLabel + ", label %" + ifFalseLabel + "\n");
+        code.append(ifTrueLabel + ":\n");
+        generateCode(parseTree.getChildren().get(3)); //<Instruction>
+        code.append(ifFalseLabel + ":\n");
+    }
+
+    public void if_2(ParseTree parseTree) {
+        String boolValue = cond(parseTree.getChildren().get(1)); //<Cond>
+        instructionCounter++;
+        code.append("br i1 %" + boolValue + ", label %" + ifTrueLabel + ", label %" + ifFalseLabel + "\n")
+            .append(ifTrueLabel + ":\n");
+        generateCode(parseTree.getChildren().get(3)); //<Instruction1>
+        code.append(ifFalseLabel + ":\n");
+        generateCode(parseTree.getChildren().get(5)); //<Instruction2>
+    }
+
+    public void if_(ParseTree parseTree) {
+        switch (parseTree.getChildren().size()) {
+            case 5:
+                if_1(parseTree);
+                break;
+            case 6:
+                if_2(parseTree);
+                break;
+            default:
+                throw new RuntimeException("Invalid if");
         }
-        return null;
     }
 
     public String cond(ParseTree parseTree) {
@@ -299,12 +299,11 @@ public class LLVM {
                         code.append("%" + numberedVariable + "= or i32 " + leftConj + ", " + rightConj + "\n");
                         return numberedVariable;
                     default:
-                        //Throw error
-                        break;
+                        throw new RuntimeException("Invalid cond");
                 }
             }
+            return null;
         }
-        return null;
     }
 
     private String conj(ParseTree parseTree) {
@@ -332,7 +331,7 @@ public class LLVM {
 
     private String simplecond(ParseTree parseTree) {
         if (parseTree.getChildren().size() == 1) {
-            cond(parseTree.getChildren().get(1)); //<Cond>
+            return cond(parseTree.getChildren().get(1));
         } else {
             String leftComp = generateCode(parseTree.getChildren().get(0));
             String rightComp = generateCode(parseTree.getChildren().get(2));
@@ -347,38 +346,37 @@ public class LLVM {
                     code.append("%" + numberedVariable + " = icmp slt i32 " + leftComp + ", " + rightComp + "\n");
                     return numberedVariable;
                 default:
-                    break;
+                    throw new RuntimeException("Invalid simplecond");
             }
         }
-        return null;
     }
 
-    private String while_(ParseTree parseTree) {
-        String myLabelWhileLoop = "whileLoop_" + instructionCounter;
-        code.append("br label %" + myLabelWhileLoop + "\n");
-        code.append(myLabelWhileLoop + ":\n");
-        String cmp = cond(parseTree.getChildren().get(1)); //<Cond>
-        String myLabelWhileBody = "body_" + instructionCounter;
-        String myLabelWhileEnd = "end_" + instructionCounter;
-        code.append("br i1 %" + cmp + ", label %" + myLabelWhileBody + ", label %" + myLabelWhileEnd + "\n");
-        code.append(myLabelWhileBody + ":\n");
+    private void while_(ParseTree parseTree) {
+        code.append("br label %" + whileLoopLabel + "\n")
+            .append(whileLoopLabel + ":\n");
+        String boolValue = cond(parseTree.getChildren().get(1));
+        code.append("br i1 %" + boolValue + ", label %" + whileBodyLabel + ", label %" + WhileEndLabel + "\n")
+            .append(whileBodyLabel + ":\n");
         instructionCounter++;
-        generateCode(parseTree.getChildren().get(3)); //<Instruction>
-        code.append("br label %" + myLabelWhileLoop + "\n");
-        code.append(myLabelWhileEnd + ":\n");
-        return null;
+        generateCode(parseTree.getChildren().get(3));
+        code.append("br label %" + whileLoopLabel + "\n")
+            .append(WhileEndLabel + ":\n");
     }
 
-    private String print(ParseTree parseTree) {
+    private void print(ParseTree parseTree) {
         String varname = parseTree.getChildren().get(2).getLabel().getValue().toString();
-        code.append("call void @println(i32 %" + varname + ")\n");
-        return null;
+        if (namedVariables.contains(varname)) {
+            String numberedVariable = addNumberedVariable();
+            code.append("%" + numberedVariable + " = load i32, i32* %" + varname + "\n");
+            code.append("call void @println(i32 %" + numberedVariable + ")\n");
+        } else {
+            code.append("call void @println(i32 %" + varname + ")\n");
+        }
     }
 
-    private String read(ParseTree parseTree) {
+    private void read(ParseTree parseTree) {
         String varname = parseTree.getChildren().get(2).getLabel().getValue().toString();
         code.append("%" + varname + " = call i32 @readInt()\n");
-        return null;
     }
 
     public String getCode() {   
