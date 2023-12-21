@@ -31,7 +31,9 @@ public class AST extends ParseTree {
             switch (current.getValue().toString()) {
                 case "Instruction":
                     for (ParseTree grandchild : generateAST(child)) {
-                        children.add(grandchild);
+                        if (grandchild.getLabel().isNonTerminal()) {
+                            children.add(grandchild);
+                        }
                     }
                     break;
                 case "InstListTail":

@@ -46,7 +46,7 @@ public class LLVM {
                 read(parseTree);
                 break;
             default:
-                throw new RuntimeException("Invalid code");
+                throw new RuntimeException("Invalid rule");
         }
     }
 
@@ -137,58 +137,74 @@ public class LLVM {
         code.append("store i32 " + value + ", i32* %" + namedVariable + "\n");
     }
 
-    //TODO: fix this
+
     public String exprarith(ParseTree parseTree) {
         int n = parseTree.getChildren().size();
         if (n == 1) {
             return prod(parseTree.getChildren().get(0));
-        } else {
-            for (int i = 0; i < n; i += 3) {
-                String leftProd = prod(parseTree.getChildren().get(i));
+        } else if (n >= 3 && n % 2 == 1) {
+            String leftProd = "";
+            String last = "";
+            for (int i = 0; i < n; i += 2) {
+                if (last.isEmpty()) {
+                    leftProd = prod(parseTree.getChildren().get(0));
+                } else {
+                    leftProd = last;
+                }
                 String rightProd = prod(parseTree.getChildren().get(i+2));
                 String numberedVariable = "";
                 switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
                     case PLUS:
                         numberedVariable = "%" + addNumberedVariable();
                         code.append(numberedVariable + " = add i32 " + leftProd + ", " + rightProd + "\n");
-                        return numberedVariable;
+                        break;
                     case MINUS:
                         numberedVariable = "%" + addNumberedVariable();
                         code.append(numberedVariable + " = sub i32 " + leftProd + ", " + rightProd + "\n");
-                        return numberedVariable;
+                        break;
                     default:
-                        throw new RuntimeException("Invalid exprarith");
+                        throw new RuntimeException("Invalid op");
                 }
+                last = numberedVariable;
             }
+            return last;
+        } else {
+            throw new RuntimeException("Invalid exprarith");
         }
-        return null;
     }
 
-    //TODO: fix this
     public String prod(ParseTree parseTree) {
         int n = parseTree.getChildren().size();
         if (n == 1) {
             return atom(parseTree.getChildren().get(0));
-        } else {
-            for (int i = 0; i < n; i += 3) {
-                String leftAtom = atom(parseTree.getChildren().get(i));
+        } else if (n >= 3 && n % 2 == 1) {
+            String leftAtom = "";
+            String last = "";
+            for (int i = 0; i < n; i += 2) {
+                if (last.isEmpty()) {
+                    leftAtom = atom(parseTree.getChildren().get(0));
+                } else {
+                    leftAtom = last;
+                }
                 String rightAtom = atom(parseTree.getChildren().get(i+2));
                 String numberedVariable = "";
                 switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
                     case DIVIDE:
                         numberedVariable = "%" + addNumberedVariable();
                         code.append(numberedVariable + " = sdiv i32 " + leftAtom + ", " + rightAtom + "\n");
-                        return numberedVariable;
+                        break;
                     case TIMES:
                         numberedVariable = "%" + addNumberedVariable();
                         code.append(numberedVariable + " = mul i32 " + leftAtom + ", " + rightAtom + "\n");
-                        return numberedVariable;
+                        break;
                     default:
-                        throw new RuntimeException("Invalid prod");
+                        throw new RuntimeException("Invalid op");
                 }
+                last = numberedVariable;
             }
+            return last;
         }
-        return null;
+        throw new RuntimeException("Invalid prod");
     }
 
     public int unaryMinus(ParseTree parseTree, int minusCounter) {
@@ -267,51 +283,64 @@ public class LLVM {
         }
     }
 
-    //TODO: fix this
     public String cond(ParseTree parseTree) {
         int n = parseTree.getChildren().size();
         if (n == 1) {
             return conj(parseTree.getChildren().get(0));
-        } else {
-            for (int i = 0; i < n; i += 3) {
-                String leftConj = conj(parseTree.getChildren().get(i));
+        } else if (n >= 3 && n % 2 == 1) {
+            String leftConj = "";
+            String last = "";
+            for (int i = 0; i < n; i += 2) {
+                if (last.isEmpty()) {
+                    leftConj = atom(parseTree.getChildren().get(0));
+                } else {
+                    leftConj = last;
+                }
                 String rightConj = conj(parseTree.getChildren().get(i+2));
                 String numberedVariable = "";
                 switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
                     case OR:
                         numberedVariable = addNumberedVariable();
                         code.append("%" + numberedVariable + "= or i32 " + leftConj + ", " + rightConj + "\n");
-                        return numberedVariable;
+                        break;
                     default:
-                        throw new RuntimeException("Invalid cond");
+                        throw new RuntimeException("Invalid op");
                 }
+                last = numberedVariable;
             }
-            return null;
+            return last;
         }
+        throw new RuntimeException("Invalid cond");
     }
 
-    //TODO: fix this
     private String conj(ParseTree parseTree) {
         int n = parseTree.getChildren().size();
         if (n == 1) {
             return simplecond(parseTree.getChildren().get(0));
-        } else {
-            for (int i = 0; i < n; i += 3) {
-                String leftSimpleCond = simplecond(parseTree.getChildren().get(i));
+        } else if (n >= 3 && n % 2 == 1) {
+            String leftSimpleCond = "";
+            String last = "";
+            for (int i = 0; i < n; i += 2) {
+                if (last.isEmpty()) {
+                    leftSimpleCond = atom(parseTree.getChildren().get(0));
+                } else {
+                    leftSimpleCond = last;
+                }
                 String rightSimpleCond= simplecond(parseTree.getChildren().get(i+2));
                 String numberedVariable = "";
                 switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
                     case AND:
                         numberedVariable = addNumberedVariable();
                         code.append("%" + numberedVariable + "= and i32 " + leftSimpleCond + ", " + rightSimpleCond + "\n");
-                        return numberedVariable;
-                    default:
-                        //Throw error
                         break;
+                    default:
+                        throw new RuntimeException("Invalid op");
                 }
+                last = numberedVariable;
             }
+            return last;
         }
-        return null;
+        throw new RuntimeException("Invalid conj");
     }
 
     private String simplecond(ParseTree parseTree) {

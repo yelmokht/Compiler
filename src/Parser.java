@@ -73,7 +73,7 @@ public class Parser{
                 ruleLhs+multispace(2+widestNonTerm-ruleLhs.length())+ // Align right hand-sides regardless of length of the left hand-side
                 "→  "+ruleRhs);
         } else {
-            System.out.print(rNum+" ");
+            //System.out.print(rNum+" ");
         }
     }
     
@@ -143,7 +143,7 @@ public class Parser{
     public ParseTree parse() throws IOException, ParseException{
         // Program is the initial symbol of the grammar
         ParseTree pt = program();
-        if (!this.fullRuleDisplay) {System.out.println();} // New line at the end of list of rules
+        //if (!this.fullRuleDisplay) {System.out.println();} // New line at the end of list of rules
         return pt;
     }
     
