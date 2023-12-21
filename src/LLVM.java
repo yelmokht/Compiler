@@ -7,6 +7,7 @@ public class LLVM {
     private ArrayList<String> namedVariables = new ArrayList<>();
     private int numberedVariableCounter = 0;
     private int instructionCounter = 0;
+    private int minusCounter = 0;
 
     public LLVM(AST ast) {
         this.ast = ast;
@@ -73,47 +74,38 @@ public class LLVM {
         return varname;
     }
 
-    public String addNumberedVariable(String number) {
+    public String addNumberedVariable() {
         numberedVariableCounter++;
-        code.append("%" + String.valueOf(numberedVariableCounter) + " = alloca i32\n");
-        code.append("store i32 " + number + ", i32* %" + String.valueOf(numberedVariableCounter) + "\n");
-        numberedVariableCounter++;
-        code.append("%" + String.valueOf(numberedVariableCounter) + " = load i32, i32* %" + String.valueOf(numberedVariableCounter - 1) + "\n");
         return String.valueOf(numberedVariableCounter);
     }
 
-        public String addNumberedVariable() {
-            numberedVariableCounter++;
-            return String.valueOf(numberedVariableCounter);
-        }
-
-        public void addReadFunction() {
-                code.append("@.strR = private unnamed_addr constant [3 x i8] c\"%d\\00\", align 1\n")
-                    .append("\n")
-                    .append("define i32 @readInt() {\n")
-                    .append("  %x = alloca i32, align 4\n")
-                    .append("  %1 = call i32 (i8*, ...) @__isoc99_scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @.strR, i32 0, i32 0), i32* %x)\n")
-                    .append("  %2 = load i32, i32* %x, align 4\n")
-                    .append("  ret i32 %2\n")
-                    .append("}\n")
-                    .append("declare i32 @__isoc99_scanf(i8*, ...)");
-            }
-
-            public void addPrintFunction() {
-            code.append("@.strP = private unnamed_addr constant [4 x i8] c\"%d\\0A\\00\", align 1\n")
+    public void addReadFunction() {
+            code.append("@.strR = private unnamed_addr constant [3 x i8] c\"%d\\00\", align 1\n")
                 .append("\n")
-                .append("; Function Attrs: nounwind uwtable\n")
-                .append("define void @println(i32 %x) #0 {\n")
-                .append("  %1 = alloca i32, align 4\n")
-                .append("  store i32 %x, i32* %1, align 4\n")
-                .append("  %2 = load i32, i32* %1, align 4\n")
-                .append("  %3 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.strP, i32 0, i32 0), i32 %2)\n")
-                .append("  ret void\n")
+                .append("define i32 @readInt() {\n")
+                .append("  %x = alloca i32, align 4\n")
+                .append("  %1 = call i32 (i8*, ...) @__isoc99_scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @.strR, i32 0, i32 0), i32* %x)\n")
+                .append("  %2 = load i32, i32* %x, align 4\n")
+                .append("  ret i32 %2\n")
                 .append("}\n")
-                .append("\n")
-                .append("declare i32 @printf(i8*, ...) #1;\n")
-                .append("\n");
+                .append("declare i32 @__isoc99_scanf(i8*, ...)");
         }
+
+        public void addPrintFunction() {
+        code.append("@.strP = private unnamed_addr constant [4 x i8] c\"%d\\0A\\00\", align 1\n")
+            .append("\n")
+            .append("; Function Attrs: nounwind uwtable\n")
+            .append("define void @println(i32 %x) #0 {\n")
+            .append("  %1 = alloca i32, align 4\n")
+            .append("  store i32 %x, i32* %1, align 4\n")
+            .append("  %2 = load i32, i32* %1, align 4\n")
+            .append("  %3 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.strP, i32 0, i32 0), i32 %2)\n")
+            .append("  ret void\n")
+            .append("}\n")
+            .append("\n")
+            .append("declare i32 @printf(i8*, ...) #1;\n")
+            .append("\n");
+    }
 
     public String program(ParseTree parseTree) {
         addReadFunction();
@@ -163,8 +155,6 @@ public class LLVM {
         addNamedVariable(namedVariable);
         String value = exprarith(parseTree.getChildren().get(2)); //<ExprArith>
         code.append("store i32 " + value + ", i32* %" + namedVariable + "\n");
-        //String numberedVariable = addNumberedVariable();
-        //code.append("%" + numberedVariable + " = load i32, i32* %" + namedVariable + "\n");
         return null;
     }
 
@@ -179,12 +169,12 @@ public class LLVM {
                 String numberedVariable = "";
                 switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
                     case PLUS:
-                        numberedVariable = addNumberedVariable();
-                        code.append("%" + numberedVariable + " = add i32 " + leftProd + ", " + rightProd + "\n");
+                        numberedVariable = "%" + addNumberedVariable();
+                        code.append(numberedVariable + " = add i32 " + leftProd + ", " + rightProd + "\n");
                         return numberedVariable;
                     case MINUS:
-                        numberedVariable = addNumberedVariable();
-                        code.append("%" + numberedVariable + " = sub i32 " + leftProd + ", " + rightProd + "\n");
+                        numberedVariable = "%" + addNumberedVariable();
+                        code.append(numberedVariable + " = sub i32 " + leftProd + ", " + rightProd + "\n");
                         return numberedVariable;
                     default:
                         //Throw error
@@ -205,12 +195,12 @@ public class LLVM {
                 String numberedVariable = "";
                 switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
                     case DIVIDE:
-                        numberedVariable = addNumberedVariable();
-                        code.append("%" + numberedVariable + " = sdiv i32 " + leftAtom + ", " + rightAtom + "\n");
+                        numberedVariable = "%" + addNumberedVariable();
+                        code.append(numberedVariable + " = sdiv i32 " + leftAtom + ", " + rightAtom + "\n");
                         return numberedVariable;
                     case TIMES:
-                        numberedVariable = addNumberedVariable();
-                        code.append("%" + numberedVariable + " = mul i32 " + leftAtom + ", " + rightAtom + "\n");
+                        numberedVariable = "%" + addNumberedVariable();
+                        code.append(numberedVariable + " = mul i32 " + leftAtom + ", " + rightAtom + "\n");
                         return numberedVariable;
                     default:
                         //Throw error
@@ -221,9 +211,17 @@ public class LLVM {
         return null;
     }
 
-    public String unaryMinus(ParseTree parseTree) {
-        //TODO
-        return null;
+    public int unaryMinus(ParseTree parseTree, int minusCounter) {
+        for (ParseTree grandchild : parseTree.getChildren()) {
+            if (grandchild.getLabel().isTerminal() && grandchild.getLabel().getType() == LexicalUnit.MINUS) {
+                minusCounter++;
+            } else if (grandchild.getLabel().isNonTerminal() && grandchild.getLabel().getValue().equals("Atom")) {
+                unaryMinus(grandchild, minusCounter);
+            } else {
+                //Throw error
+            }
+        }
+        return minusCounter;
     }
 
     public String atom(ParseTree parseTree) {
@@ -231,7 +229,17 @@ public class LLVM {
         String result = "";
         switch (grandchild.getLabel().getType()) {
             case MINUS:
-                result = unaryMinus(parseTree);
+                if (minusCounter == 0) { //pas calcluer
+                    minusCounter = unaryMinus(parseTree, minusCounter);
+                    System.out.println("Minus counter: " + minusCounter);
+                }
+                if (minusCounter % 2 == 0) {
+                    result = atom(parseTree.getChildren().get(1));
+                } else {
+                    String numberedVariable = "%" + addNumberedVariable();
+                    code.append(numberedVariable + " = sub i32 0, " + atom(parseTree.getChildren().get(1)) + "\n");
+                    result = numberedVariable;
+                }
                 break;
             case LPAREN:
                 result = exprarith(parseTree.getChildren().get(1));
@@ -373,8 +381,7 @@ public class LLVM {
         return null;
     }
 
-    public String getCode() {
-        System.out.println("Named variables: " + namedVariables);
+    public String getCode() {   
         return code.toString();
     }
 }
