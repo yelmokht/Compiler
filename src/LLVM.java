@@ -18,9 +18,8 @@ public class LLVM {
         generateCode(ast);
     }
 
-    public String generateCode(ParseTree parseTree) {
+    public void generateCode(ParseTree parseTree) {
         Symbol current = parseTree.getLabel();
-        String result = null;
         switch (current.getValue().toString()) {
             case "Program":
                 program(parseTree);
@@ -34,26 +33,8 @@ public class LLVM {
             case "Assign":
                 assign(parseTree);
                 break;
-            case "ExprArith":
-                result = exprarith(parseTree);
-                break;
-            case "Prod":
-                result = prod(parseTree);
-                break;
-            case "Atom":
-                result = atom(parseTree);
-                break;
             case "If":
                 if_(parseTree);
-                break;
-            case "Cond":
-                result = cond(parseTree);
-                break;
-            case "Conj":
-                result = conj(parseTree);
-                break;
-            case "SimpleCond":
-                result = simplecond(parseTree);
                 break;
             case "While":
                 while_(parseTree);
@@ -65,9 +46,8 @@ public class LLVM {
                 read(parseTree);
                 break;
             default:
-                break;
+                throw new RuntimeException("Invalid code");
         }
-        return result;
     }
 
     public String addNamedVariable(String varname) {
@@ -157,6 +137,7 @@ public class LLVM {
         code.append("store i32 " + value + ", i32* %" + namedVariable + "\n");
     }
 
+    //TODO: fix this
     public String exprarith(ParseTree parseTree) {
         int n = parseTree.getChildren().size();
         if (n == 1) {
@@ -182,6 +163,8 @@ public class LLVM {
         }
         return null;
     }
+
+    //TODO: fix this
     public String prod(ParseTree parseTree) {
         int n = parseTree.getChildren().size();
         if (n == 1) {
@@ -284,6 +267,7 @@ public class LLVM {
         }
     }
 
+    //TODO: fix this
     public String cond(ParseTree parseTree) {
         int n = parseTree.getChildren().size();
         if (n == 1) {
@@ -306,6 +290,7 @@ public class LLVM {
         }
     }
 
+    //TODO: fix this
     private String conj(ParseTree parseTree) {
         int n = parseTree.getChildren().size();
         if (n == 1) {
@@ -333,8 +318,8 @@ public class LLVM {
         if (parseTree.getChildren().size() == 1) {
             return cond(parseTree.getChildren().get(1));
         } else {
-            String leftComp = generateCode(parseTree.getChildren().get(0));
-            String rightComp = generateCode(parseTree.getChildren().get(2));
+            String leftComp = exprarith(parseTree.getChildren().get(0));
+            String rightComp = exprarith(parseTree.getChildren().get(2));
             String numberedVariable = "";
             switch (parseTree.getChildren().get(1).getLabel().getType()) {
                 case EQUAL:
