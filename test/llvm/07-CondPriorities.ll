@@ -29,8 +29,8 @@ define i32 @main() {
 		%1 = icmp eq i32 %x, 1
 		%2 = icmp slt i32 %y, 2
 		%3 = icmp slt i32 3, %z
-		%4= and i32 2, 3
-		%5= or i32 1, 4
+		%4 = and i32 %2, %3
+		%5 = or i32 %1, %4
 		br i1 %5, label %whileBody_0, label %whileEnd_0
 	whileBody_0:
 		store i32 %x, i32* %a

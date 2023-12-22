@@ -28,7 +28,7 @@ define i32 @main() {
 	whileLoop_0:
 		%1 = icmp slt i32 0, %x
 		%2 = icmp slt i32 %y, %z
-		%3= or i32 1, 2
+		%3 = or i32 %1, %2
 		br i1 %3, label %whileBody_0, label %whileEnd_0
 	whileBody_0:
 		store i32 %x, i32* %a

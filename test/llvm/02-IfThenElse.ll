@@ -26,6 +26,6 @@ define i32 @main() {
 	ifTrue_0:
 		store i32 0, i32* %x
 	ifFalse_0:
-	store i32 1, i32* %x
+		store i32 1, i32* %x
 		ret i32 0
 	}

@@ -158,11 +158,11 @@ public class LLVM {
             String last = "";
             for (int i = 0; i < n - 1; i += 2) {
                 if (last.isEmpty()) {
-                    leftProd = prod(parseTree.getChildren().get(0));
-                    rightProd = prod(parseTree.getChildren().get(2));
+                    leftProd = prod(parseTree.getChildren().get(i));
+                    rightProd = prod(parseTree.getChildren().get(i+2));
                 } else {
                     leftProd = last;
-                    rightProd = prod(parseTree.getChildren().get(i));
+                    rightProd = prod(parseTree.getChildren().get(i+2));
                 }
                 String numberedVariable = "";
                 switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
@@ -195,11 +195,11 @@ public class LLVM {
             String last = "";
             for (int i = 0; i < n - 1; i += 2) {
                 if (last.isEmpty()) {
-                    leftAtom = atom(parseTree.getChildren().get(0));
-                    rightAtom = atom(parseTree.getChildren().get(2));
+                    leftAtom = atom(parseTree.getChildren().get(i));
+                    rightAtom = atom(parseTree.getChildren().get(i+2));
                 } else {
                     leftAtom = last;
-                    rightAtom = atom(parseTree.getChildren().get(i));
+                    rightAtom = atom(parseTree.getChildren().get(i+2));
                 }
                 String numberedVariable = "";
                 switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
@@ -276,17 +276,17 @@ public class LLVM {
             String last = "";
             for (int i = 0; i < n - 1; i += 2) {
                 if (last.isEmpty()) {
-                    leftConj = conj(parseTree.getChildren().get(0));
-                    rightConj = conj(parseTree.getChildren().get(2));
+                    leftConj = conj(parseTree.getChildren().get(i));
+                    rightConj = conj(parseTree.getChildren().get(i+2));
                 } else {
                     leftConj = last;
-                    rightConj = conj(parseTree.getChildren().get(i));
+                    rightConj = conj(parseTree.getChildren().get(i+2));
                 }
                 String numberedVariable = "";
                 switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
                     case OR:
-                        numberedVariable = addNumberedVariable();
-                        addCode("%" + numberedVariable + "= or i32 " + leftConj + ", " + rightConj + "\n");
+                        numberedVariable = "%" + addNumberedVariable();
+                        addCode(numberedVariable + " = or i32 " + leftConj + ", " + rightConj + "\n");
                         break;
                     default:
                         throw new RuntimeException("Invalid op");
@@ -308,17 +308,17 @@ public class LLVM {
             String last = "";
             for (int i = 0; i < n - 1; i += 2) {
                 if (last.isEmpty()) {
-                    leftSimpleCond = simplecond(parseTree.getChildren().get(0));
-                    rightSimpleCond = simplecond(parseTree.getChildren().get(2));
+                    leftSimpleCond = simplecond(parseTree.getChildren().get(i));
+                    rightSimpleCond = simplecond(parseTree.getChildren().get(i+2));
                 } else {
                     leftSimpleCond = last;
-                    rightSimpleCond = simplecond(parseTree.getChildren().get(i));
+                    rightSimpleCond = simplecond(parseTree.getChildren().get(i+2));
                 }
                 String numberedVariable = "";
                 switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
                     case AND:
-                        numberedVariable = addNumberedVariable();
-                        addCode("%" + numberedVariable + "= and i32 " + leftSimpleCond + ", " + rightSimpleCond + "\n");
+                        numberedVariable = "%" + addNumberedVariable();
+                        addCode(numberedVariable + " = and i32 " + leftSimpleCond + ", " + rightSimpleCond + "\n");
                         break;
                     default:
                         throw new RuntimeException("Invalid op");
@@ -339,12 +339,12 @@ public class LLVM {
             String numberedVariable = "";
             switch (parseTree.getChildren().get(1).getLabel().getType()) {
                 case EQUAL:
-                    numberedVariable = addNumberedVariable();
-                    addCode("%" + numberedVariable + " = icmp eq i32 " + leftComp + ", " + rightComp + "\n");
+                    numberedVariable = "%" + addNumberedVariable();
+                    addCode(numberedVariable + " = icmp eq i32 " + leftComp + ", " + rightComp + "\n");
                     return numberedVariable;
                 case SMALLER:
-                    numberedVariable = addNumberedVariable();
-                    addCode("%" + numberedVariable + " = icmp slt i32 " + leftComp + ", " + rightComp + "\n");
+                    numberedVariable = "%" + addNumberedVariable();
+                    addCode(numberedVariable + " = icmp slt i32 " + leftComp + ", " + rightComp + "\n");
                     return numberedVariable;
                 default:
                     throw new RuntimeException("Invalid simplecond");
@@ -356,7 +356,7 @@ public class LLVM {
         String ifTLabel = ifTrueLabel + instructionCounter;
         String ifFLabel = ifFalseLabel + instructionCounter;
         String boolValue = cond(parseTree.getChildren().get(1)); //<Cond>
-        addCode("br i1 %" + boolValue + ", label %" + ifTLabel + ", label %" + ifFLabel + "\n");
+        addCode("br i1 " + boolValue + ", label %" + ifTLabel + ", label %" + ifFLabel + "\n");
         addCode(ifTLabel + ":\n");
         tabulation++;
         instructionCounter++;
@@ -370,16 +370,16 @@ public class LLVM {
         String ifTLabel = ifTrueLabel + instructionCounter;
         String ifFLabel = ifFalseLabel + instructionCounter;
         String boolValue = cond(parseTree.getChildren().get(1)); //<Cond>
-        addCode("br i1 %" + boolValue + ", label %" + ifTLabel + ", label %" + ifFLabel + "\n");
+        addCode("br i1 " + boolValue + ", label %" + ifTLabel + ", label %" + ifFLabel + "\n");
         addCode(ifTLabel + ":\n");
         tabulation++;
         instructionCounter++;
         generateCode(parseTree.getChildren().get(3)); //<Instruction1>
         tabulation--;
         addCode(ifFLabel + ":\n");
+        tabulation++;
         instructionCounter++;
         generateCode(parseTree.getChildren().get(5)); //<Instruction2>
-        tabulation++;
     }
 
     public void if_(ParseTree parseTree) {
@@ -406,7 +406,7 @@ public class LLVM {
         addCode(loopLabel + ":\n");
         tabulation++;
         String boolValue = cond(parseTree.getChildren().get(1));
-        addCode("br i1 %" + boolValue + ", label %" + bodyLabel + ", label %" + endLabel + "\n");
+        addCode("br i1 " + boolValue + ", label %" + bodyLabel + ", label %" + endLabel + "\n");
         tabulation--;
         addCode(bodyLabel+ ":\n");
         tabulation++;

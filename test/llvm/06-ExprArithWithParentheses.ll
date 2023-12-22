@@ -23,8 +23,7 @@ define i32 @main() {
 	%x = alloca i32
 	%1 = add i32 1, 2
 	%2 = mul i32 0, %1
-	%3 = add i32 1, 2
-	%4 = mul i32 %2, %3
-	store i32 %4, i32* %x
+	%3 = mul i32 %2, 3
+	store i32 %3, i32* %x
 	ret i32 0
 }
