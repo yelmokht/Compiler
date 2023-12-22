@@ -29,5 +29,5 @@ define i32 @main() {
 		store i32 1, i32* %y
 		br label %whileLoop_0
 	whileEnd_0:
-	ret i32 0
-}
+		ret i32 0
+	}

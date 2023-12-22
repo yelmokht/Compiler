@@ -12,7 +12,7 @@ public class LLVM {
     private String ifFalseLabel =  "ifFalse_";
     private String whileLoopLabel = "whileLoop_";
     private String whileBodyLabel = "whileBody_";
-    private String WhileEndLabel = "whileEnd_";
+    private String whileEndLabel = "whileEnd_";
 
     public LLVM(AST ast) {
         this.ast = ast;
@@ -20,8 +20,7 @@ public class LLVM {
     }
 
     public void generateCode(ParseTree parseTree) {
-        Symbol current = parseTree.getLabel();
-        switch (current.getValue().toString()) {
+        switch (parseTree.getLabel().getValue().toString()) {
             case "Program":
                 program(parseTree);
                 break;
@@ -267,42 +266,6 @@ public class LLVM {
         return result;
     }
 
-    public void if_1(ParseTree parseTree) {
-        String boolValue = cond(parseTree.getChildren().get(1)); //<Cond>
-        addCode("br i1 %" + boolValue + ", label %" + ifTrueLabel + instructionCounter + ", label %" + ifFalseLabel + instructionCounter + "\n");
-        addCode(ifTrueLabel + instructionCounter + ":\n");
-        tabulation++;
-        generateCode(parseTree.getChildren().get(3)); //<Instruction>
-        tabulation--;
-        addCode(ifFalseLabel + instructionCounter + ":\n");
-        tabulation++;
-    }
-
-    public void if_2(ParseTree parseTree) {
-        String boolValue = cond(parseTree.getChildren().get(1)); //<Cond>
-        addCode("br i1 %" + boolValue + ", label %" + ifTrueLabel + instructionCounter + ", label %" + ifFalseLabel + instructionCounter + "\n");
-        addCode(ifTrueLabel + instructionCounter + ":\n");
-        tabulation++;
-        generateCode(parseTree.getChildren().get(3)); //<Instruction1>
-        tabulation--;
-        addCode(ifFalseLabel + instructionCounter + ":\n");
-        generateCode(parseTree.getChildren().get(5)); //<Instruction2>
-        tabulation++;
-    }
-
-    public void if_(ParseTree parseTree) {
-        switch (parseTree.getChildren().size()) {
-            case 5:
-                if_1(parseTree);
-                break;
-            case 6:
-                if_2(parseTree);
-                break;
-            default:
-                throw new RuntimeException("Invalid if");
-        }
-    }
-
     public String cond(ParseTree parseTree) {
         int n = parseTree.getChildren().size();
         if (n == 1) {
@@ -389,19 +352,70 @@ public class LLVM {
         }
     }
 
+    public void if_1(ParseTree parseTree) {
+        String ifTLabel = ifTrueLabel + instructionCounter;
+        String ifFLabel = ifFalseLabel + instructionCounter;
+        String boolValue = cond(parseTree.getChildren().get(1)); //<Cond>
+        addCode("br i1 %" + boolValue + ", label %" + ifTLabel + ", label %" + ifFLabel + "\n");
+        addCode(ifTLabel + ":\n");
+        tabulation++;
+        instructionCounter++;
+        generateCode(parseTree.getChildren().get(3)); //<Instruction>
+        tabulation--;
+        addCode(ifFLabel + ":\n");
+        tabulation++;
+    }
+
+    public void if_2(ParseTree parseTree) {
+        String ifTLabel = ifTrueLabel + instructionCounter;
+        String ifFLabel = ifFalseLabel + instructionCounter;
+        String boolValue = cond(parseTree.getChildren().get(1)); //<Cond>
+        addCode("br i1 %" + boolValue + ", label %" + ifTLabel + ", label %" + ifFLabel + "\n");
+        addCode(ifTLabel + ":\n");
+        tabulation++;
+        instructionCounter++;
+        generateCode(parseTree.getChildren().get(3)); //<Instruction1>
+        tabulation--;
+        addCode(ifFLabel + ":\n");
+        instructionCounter++;
+        generateCode(parseTree.getChildren().get(5)); //<Instruction2>
+        tabulation++;
+    }
+
+    public void if_(ParseTree parseTree) {
+        switch (parseTree.getChildren().size()) {
+            case 5:
+                if_1(parseTree);
+                break;
+            case 6:
+                if_2(parseTree);
+                break;
+            default:
+                throw new RuntimeException("Invalid if");
+        }
+    }
+
     private void while_(ParseTree parseTree) {
-        addCode("br label %" + whileLoopLabel + instructionCounter + "\n");
-        addCode(whileLoopLabel + instructionCounter + ":\n");
+        String loopLabel = whileLoopLabel + instructionCounter;
+        String bodyLabel = whileBodyLabel + instructionCounter;
+        String endLabel = whileEndLabel + instructionCounter;
+        addCode("br label %" + loopLabel + "\n");
+        if (tabulation > 1) {
+            tabulation--;
+        }
+        addCode(loopLabel + ":\n");
         tabulation++;
         String boolValue = cond(parseTree.getChildren().get(1));
-        addCode("br i1 %" + boolValue + ", label %" + whileBodyLabel + instructionCounter + ", label %" + WhileEndLabel + instructionCounter + "\n");
+        addCode("br i1 %" + boolValue + ", label %" + bodyLabel + ", label %" + endLabel + "\n");
         tabulation--;
-        addCode(whileBodyLabel + instructionCounter + ":\n");
+        addCode(bodyLabel+ ":\n");
         tabulation++;
+        instructionCounter++;
         generateCode(parseTree.getChildren().get(3));
-        addCode("br label %" + whileLoopLabel + instructionCounter + "\n");
+        addCode("br label %" + loopLabel + "\n");
         tabulation--;
-        addCode(WhileEndLabel + instructionCounter + ":\n");
+        addCode(endLabel + ":\n");
+        tabulation++;
     }
 
     private void print(ParseTree parseTree) {

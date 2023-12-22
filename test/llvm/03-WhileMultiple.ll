@@ -26,22 +26,22 @@ define i32 @main() {
 		%1 = icmp slt i32 0, 1
 		br i1 %1, label %whileBody_0, label %whileEnd_0
 	whileBody_0:
-		br label %whileLoop_0
-		whileLoop_0:
-			%2 = icmp slt i32 1, 2
-			br i1 %2, label %whileBody_0, label %whileEnd_0
-		whileBody_0:
-			br label %whileLoop_0
-			whileLoop_0:
-				%3 = icmp slt i32 2, 3
-				br i1 %3, label %whileBody_0, label %whileEnd_0
-			whileBody_0:
-				store i32 3, i32* %w
-				br label %whileLoop_0
-			whileEnd_0:
-			br label %whileLoop_0
-		whileEnd_0:
+		br label %whileLoop_1
+	whileLoop_1:
+		%2 = icmp slt i32 1, 2
+		br i1 %2, label %whileBody_1, label %whileEnd_1
+	whileBody_1:
+		br label %whileLoop_2
+	whileLoop_2:
+		%3 = icmp slt i32 2, 3
+		br i1 %3, label %whileBody_2, label %whileEnd_2
+	whileBody_2:
+		store i32 3, i32* %w
+		br label %whileLoop_2
+	whileEnd_2:
+		br label %whileLoop_1
+	whileEnd_1:
 		br label %whileLoop_0
 	whileEnd_0:
-	ret i32 0
-}
+		ret i32 0
+	}
