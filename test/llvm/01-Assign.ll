@@ -20,8 +20,8 @@ define void @println(i32 %x) #0 {
 declare i32 @printf(i8*, ...) #1;
 
 define i32 @main() {
-%x = alloca i32
-%1 = add i32 1, 2
-store i32 %1, i32* %x
-ret i32 0
+	%x = alloca i32
+	%1 = add i32 1, 2
+	store i32 %1, i32* %x
+	ret i32 0
 }

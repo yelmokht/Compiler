@@ -20,7 +20,7 @@ define void @println(i32 %x) #0 {
 declare i32 @printf(i8*, ...) #1;
 
 define i32 @main() {
-%a = call i32 @readInt()
-call void @println(i32 %a)
-ret i32 0
+	%a = call i32 @readInt()
+	call void @println(i32 %a)
+	ret i32 0
 }

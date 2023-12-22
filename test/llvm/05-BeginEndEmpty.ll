@@ -20,5 +20,5 @@ define void @println(i32 %x) #0 {
 declare i32 @printf(i8*, ...) #1;
 
 define i32 @main() {
-ret i32 0
+	ret i32 0
 }

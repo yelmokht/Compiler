@@ -20,11 +20,11 @@ define void @println(i32 %x) #0 {
 declare i32 @printf(i8*, ...) #1;
 
 define i32 @main() {
-%x = alloca i32
-%1 = icmp eq i32 1, 1
-br i1 %1, label %ifTrue_0, label %ifFalse_0
-ifTrue_0:
-store i32 0, i32* %x
-ifFalse_0:
-ret i32 0
-}
+	%x = alloca i32
+	%1 = icmp eq i32 1, 1
+	br i1 %1, label %ifTrue_0, label %ifFalse_0
+	ifTrue_0:
+		store i32 0, i32* %x
+	ifFalse_0:
+		ret i32 0
+	}
