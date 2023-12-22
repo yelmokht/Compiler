@@ -7,7 +7,6 @@ public class LLVM {
     private int numberedVariableCounter = 0;
     private int instructionCounter = 0;
     private int tabulation = 0;
-    private int minusCounter = 0;
     private String ifTrueLabel = "ifTrue_";
     private String ifFalseLabel =  "ifFalse_";
     private String whileLoopLabel = "whileLoop_";
@@ -222,14 +221,10 @@ public class LLVM {
     }
 
     public int unaryMinus(ParseTree parseTree, int minusCounter) {
-        for (ParseTree grandchild : parseTree.getChildren()) {
-            if (grandchild.getLabel().isTerminal() && grandchild.getLabel().getType() == LexicalUnit.MINUS) {
-                minusCounter++;
-            } else if (grandchild.getLabel().isNonTerminal() && grandchild.getLabel().getValue().equals("Atom")) {
-                unaryMinus(grandchild, minusCounter);
-            } else {
-                throw new RuntimeException("Invalid unary minus");
-            }
+        ParseTree grandchild = parseTree.getChildren().get(0);
+        if (grandchild.getLabel().isTerminal() && grandchild.getLabel().getType() == LexicalUnit.MINUS) {
+            minusCounter++;
+            minusCounter = unaryMinus(parseTree.getChildren().get(1), minusCounter);
         }
         return minusCounter;
     }
@@ -239,16 +234,27 @@ public class LLVM {
         String result = "";
         switch (grandchild.getLabel().getType()) {
             case MINUS:
-                if (minusCounter == 0) { //pas calcluer
-                    minusCounter = unaryMinus(parseTree, minusCounter);
-                    System.out.println("Minus counter: " + minusCounter);
-                }
-                if (minusCounter % 2 == 0) {
-                    result = atom(parseTree.getChildren().get(1));
-                } else {
+                int minusCounter = 0;
+                minusCounter = unaryMinus(parseTree, minusCounter);
+                System.out.println(minusCounter);
+                if (minusCounter % 2 == 1) {
                     String numberedVariable = "%" + addNumberedVariable();
-                    addCode(numberedVariable + " = sub i32 0, " + atom(parseTree.getChildren().get(1)) + "\n");
+                    ParseTree child = null;
+                    for (int i = 0; i < minusCounter; i++) {
+                        ParseTree tree = child == null ? parseTree : child;
+                        child = tree.getChildren().get(1);
+                    }
+                    System.out.println(child.getChildren().get(0).getLabel().getValue().toString());
+                    addCode(numberedVariable + " = sub i32 0, " + atom(child) + "\n");
                     result = numberedVariable;
+                } else {
+                    ParseTree child = null;
+                    for (int i = 0; i < minusCounter; i++) {
+                        ParseTree tree = child == null ? parseTree : child;
+                        child = tree.getChildren().get(1);
+                    }
+                    result = atom(child);
+
                 }
                 break;
             case LPAREN:
