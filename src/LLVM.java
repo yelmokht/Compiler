@@ -144,14 +144,16 @@ public class LLVM {
             return prod(parseTree.getChildren().get(0));
         } else if (n >= 3 && n % 2 == 1) {
             String leftProd = "";
+            String rightProd = "";
             String last = "";
-            for (int i = 0; i < n; i += 2) {
+            for (int i = 0; i < n - 1; i += 2) {
                 if (last.isEmpty()) {
                     leftProd = prod(parseTree.getChildren().get(0));
+                    rightProd = prod(parseTree.getChildren().get(2));
                 } else {
                     leftProd = last;
+                    rightProd = prod(parseTree.getChildren().get(i));
                 }
-                String rightProd = prod(parseTree.getChildren().get(i+2));
                 String numberedVariable = "";
                 switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
                     case PLUS:
@@ -179,14 +181,15 @@ public class LLVM {
             return atom(parseTree.getChildren().get(0));
         } else if (n >= 3 && n % 2 == 1) {
             String leftAtom = "";
+            String rightAtom = "";
             String last = "";
-            for (int i = 0; i < n; i += 2) {
+            for (int i = 0; i < n - 1; i += 2) {
                 if (last.isEmpty()) {
                     leftAtom = atom(parseTree.getChildren().get(0));
                 } else {
                     leftAtom = last;
+                    rightAtom = atom(parseTree.getChildren().get(i));
                 }
-                String rightAtom = atom(parseTree.getChildren().get(i+2));
                 String numberedVariable = "";
                 switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
                     case DIVIDE:
@@ -289,14 +292,15 @@ public class LLVM {
             return conj(parseTree.getChildren().get(0));
         } else if (n >= 3 && n % 2 == 1) {
             String leftConj = "";
+            String rightConj = "";
             String last = "";
-            for (int i = 0; i < n; i += 2) {
+            for (int i = 0; i < n - 1; i += 2) {
                 if (last.isEmpty()) {
-                    leftConj = atom(parseTree.getChildren().get(0));
+                    leftConj = conj(parseTree.getChildren().get(0));
                 } else {
                     leftConj = last;
+                    rightConj = conj(parseTree.getChildren().get(i));
                 }
-                String rightConj = conj(parseTree.getChildren().get(i+2));
                 String numberedVariable = "";
                 switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
                     case OR:
@@ -319,14 +323,15 @@ public class LLVM {
             return simplecond(parseTree.getChildren().get(0));
         } else if (n >= 3 && n % 2 == 1) {
             String leftSimpleCond = "";
+            String rightSimpleCond = "";
             String last = "";
-            for (int i = 0; i < n; i += 2) {
+            for (int i = 0; i < n - 1; i += 2) {
                 if (last.isEmpty()) {
-                    leftSimpleCond = atom(parseTree.getChildren().get(0));
+                    leftSimpleCond = simplecond(parseTree.getChildren().get(0));
                 } else {
                     leftSimpleCond = last;
+                    rightSimpleCond = simplecond(parseTree.getChildren().get(i));
                 }
-                String rightSimpleCond= simplecond(parseTree.getChildren().get(i+2));
                 String numberedVariable = "";
                 switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
                     case AND:
@@ -345,7 +350,7 @@ public class LLVM {
 
     private String simplecond(ParseTree parseTree) {
         if (parseTree.getChildren().size() == 1) {
-            return cond(parseTree.getChildren().get(1));
+            return cond(parseTree.getChildren().get(0));
         } else {
             String leftComp = exprarith(parseTree.getChildren().get(0));
             String rightComp = exprarith(parseTree.getChildren().get(2));
