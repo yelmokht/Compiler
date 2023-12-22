@@ -23,7 +23,7 @@ define i32 @main() {
 	%w = alloca i32
 	br label %whileLoop_0
 	whileLoop_0:
-		%1 = icmp slt i32 0, 1
+		%1 = icmp slt i32 10, 1
 		br i1 %1, label %whileBody_0, label %whileEnd_0
 	whileBody_0:
 		br label %whileLoop_1

@@ -13,8 +13,12 @@ build: jflex
 testing: build
 	for testFile in test/_input/*.pmp ; do \
 		echo "\nTest file:" $$testFile ; \
-		echo "\tWrite LLVM code from $$(basename $$testFile .pmp).tex... \c"; \
+		echo "\tWrite LLVM code from $$(basename $$testFile .pmp).tex..."; \
 		java -jar dist/part3.jar -wt /tmp/$$(basename $$testFile .pmp).tex $$testFile > test/llvm/$$(basename $$testFile .pmp).ll ; \
+		echo "\tCompile LLVM code from $$(basename $$testFile .pmp).ll..."; \
+		llvm-as test/llvm/$$(basename $$testFile .pmp).ll -o test/llvm/$$(basename $$testFile .pmp).bc ; \
+		echo "\tRun LLVM code from $$(basename $$testFile .pmp).bc..."; \
+		lli test/llvm/$$(basename $$testFile .pmp).bc ; \
 		echo "Done"; \
 		echo "" ; \
 	done
