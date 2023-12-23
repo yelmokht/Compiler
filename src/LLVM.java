@@ -9,6 +9,7 @@ public class LLVM {
     private int tabulation = 0;
     private String ifTrueLabel = "ifTrue_";
     private String ifFalseLabel =  "ifFalse_";
+    private String ifEndLabel = "ifEnd_";
     private String whileLoopLabel = "whileLoop_";
     private String whileBodyLabel = "whileBody_";
     private String whileEndLabel = "whileEnd_";
@@ -99,12 +100,10 @@ public class LLVM {
 
     public void allocateVariables(ParseTree parseTree) {
         for (ParseTree grandchild : parseTree.getChildren()) {
-            if (!(grandchild.getLabel().getValue().toString().equals("Read") || grandchild.getLabel().getValue().toString().equals("Print"))) {
-                if (grandchild.getLabel().isTerminal() && grandchild.getLabel().getType() == LexicalUnit.VARNAME) {
-                    addNamedVariable(grandchild.getLabel().getValue().toString());
-                } else {
-                    allocateVariables(grandchild);
-                }
+            if (grandchild.getLabel().isTerminal() && grandchild.getLabel().getType() == LexicalUnit.VARNAME) {
+                addNamedVariable(grandchild.getLabel().getValue().toString());
+            } else {
+                allocateVariables(grandchild);
             }
         }
     }
@@ -236,7 +235,6 @@ public class LLVM {
             case MINUS:
                 int minusCounter = 0;
                 minusCounter = unaryMinus(parseTree, minusCounter);
-                System.out.println(minusCounter);
                 if (minusCounter % 2 == 1) {
                     String numberedVariable = "%" + addNumberedVariable();
                     ParseTree child = null;
@@ -244,7 +242,6 @@ public class LLVM {
                         ParseTree tree = child == null ? parseTree : child;
                         child = tree.getChildren().get(1);
                     }
-                    System.out.println(child.getChildren().get(0).getLabel().getValue().toString());
                     addCode(numberedVariable + " = sub i32 0, " + atom(child) + "\n");
                     result = numberedVariable;
                 } else {
@@ -261,7 +258,10 @@ public class LLVM {
                 result = exprarith(parseTree.getChildren().get(1));
                 break;
             case VARNAME:
-                result = "%"+ addNamedVariable(grandchild.getLabel().getValue().toString());
+                String nameVariable = "%"+ addNamedVariable(grandchild.getLabel().getValue().toString());
+                String numberedVariable = "%" + addNumberedVariable();
+                addCode(numberedVariable + " = load i32, i32* " + nameVariable + "\n"); 
+                result = numberedVariable;
                 break;
             case NUMBER:
                 result = grandchild.getLabel().getValue().toString();
@@ -292,7 +292,7 @@ public class LLVM {
                 switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
                     case OR:
                         numberedVariable = "%" + addNumberedVariable();
-                        addCode(numberedVariable + " = or i32 " + leftConj + ", " + rightConj + "\n");
+                        addCode(numberedVariable + " = or i1 " + leftConj + ", " + rightConj + "\n");
                         break;
                     default:
                         throw new RuntimeException("Invalid op");
@@ -324,7 +324,7 @@ public class LLVM {
                 switch (parseTree.getChildren().get(i+1).getLabel().getType()) {
                     case AND:
                         numberedVariable = "%" + addNumberedVariable();
-                        addCode(numberedVariable + " = and i32 " + leftSimpleCond + ", " + rightSimpleCond + "\n");
+                        addCode(numberedVariable + " = and i1 " + leftSimpleCond + ", " + rightSimpleCond + "\n");
                         break;
                     default:
                         throw new RuntimeException("Invalid op");
@@ -359,33 +359,40 @@ public class LLVM {
     }
 
     public void if_1(ParseTree parseTree) {
-        String ifTLabel = ifTrueLabel + instructionCounter;
-        String ifFLabel = ifFalseLabel + instructionCounter;
+        String trueLabel = ifTrueLabel + instructionCounter;
+        String endLabel = ifEndLabel + instructionCounter;
         String boolValue = cond(parseTree.getChildren().get(1)); //<Cond>
-        addCode("br i1 " + boolValue + ", label %" + ifTLabel + ", label %" + ifFLabel + "\n");
-        addCode(ifTLabel + ":\n");
+        addCode("br i1 " + boolValue + ", label %" + trueLabel + ", label %" + endLabel + "\n");
+        addCode(trueLabel + ":\n");
         tabulation++;
         instructionCounter++;
         generateCode(parseTree.getChildren().get(3)); //<Instruction>
+        addCode("br label %" + endLabel + "\n");
         tabulation--;
-        addCode(ifFLabel + ":\n");
+        addCode(endLabel + ":\n");
         tabulation++;
     }
 
     public void if_2(ParseTree parseTree) {
-        String ifTLabel = ifTrueLabel + instructionCounter;
-        String ifFLabel = ifFalseLabel + instructionCounter;
+        String trueLabel = ifTrueLabel + instructionCounter;
+        String falseLabel = ifFalseLabel + instructionCounter;
+        String endLabel = ifEndLabel + instructionCounter;
         String boolValue = cond(parseTree.getChildren().get(1)); //<Cond>
-        addCode("br i1 " + boolValue + ", label %" + ifTLabel + ", label %" + ifFLabel + "\n");
-        addCode(ifTLabel + ":\n");
+        addCode("br i1 " + boolValue + ", label %" + trueLabel + ", label %" + falseLabel + "\n");
+        addCode(trueLabel + ":\n");
         tabulation++;
         instructionCounter++;
         generateCode(parseTree.getChildren().get(3)); //<Instruction1>
+        addCode("br label %" + endLabel + "\n");
         tabulation--;
-        addCode(ifFLabel + ":\n");
+        addCode(falseLabel + ":\n");
         tabulation++;
         instructionCounter++;
         generateCode(parseTree.getChildren().get(5)); //<Instruction2>
+        addCode("br label %" + endLabel + "\n");
+        tabulation--;
+        addCode(endLabel + ":\n");
+        tabulation++;
     }
 
     public void if_(ParseTree parseTree) {
@@ -437,7 +444,9 @@ public class LLVM {
 
     private void read(ParseTree parseTree) {
         String varname = parseTree.getChildren().get(2).getLabel().getValue().toString();
-        addCode("%" + varname + " = call i32 @readInt()\n");
+        String numberedVariable = addNumberedVariable();
+        addCode("%" + numberedVariable + " = call i32 @readInt()\n");
+        addCode("store i32 %" + numberedVariable + ", i32* %" + varname + "\n");
     }
 
     public String getCode() {   

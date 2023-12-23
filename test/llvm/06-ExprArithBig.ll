@@ -1,5 +1,3 @@
-1
-2
 @.strR = private unnamed_addr constant [3 x i8] c"%d\00", align 1
 
 define i32 @readInt() {
@@ -23,10 +21,11 @@ declare i32 @printf(i8*, ...) #1;
 
 define i32 @main() {
 	%x = alloca i32
-	%1 = add i32 %x, 3
-	%2 = sub i32 0, 2
-	%3 = mul i32 %1, %2
-	%4 = sdiv i32 %3, 4
-	store i32 %4, i32* %x
+	%1 = load i32, i32* %x
+	%2 = add i32 %1, 3
+	%3 = sub i32 0, 2
+	%4 = mul i32 %2, %3
+	%5 = sdiv i32 %4, 4
+	store i32 %5, i32* %x
 	ret i32 0
 }

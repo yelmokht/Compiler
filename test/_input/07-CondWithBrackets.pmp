@@ -1,4 +1,4 @@
 begin
-  while {x = 1 or {y < 2}} and 3 < z do
-    a := x
+  while {3 = 1 or {43 < 2}} and 3 < 1 do
+    a := 1
 end

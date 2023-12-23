@@ -25,7 +25,10 @@ define i32 @main() {
 	br i1 %1, label %ifTrue_0, label %ifFalse_0
 	ifTrue_0:
 		store i32 0, i32* %x
+		br label %ifEnd_0
 	ifFalse_0:
 		store i32 1, i32* %x
+		br label %ifEnd_0
+	ifEnd_0:
 		ret i32 0
 	}

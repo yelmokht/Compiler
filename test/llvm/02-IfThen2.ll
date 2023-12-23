@@ -22,9 +22,10 @@ declare i32 @printf(i8*, ...) #1;
 define i32 @main() {
 	%x = alloca i32
 	%1 = icmp eq i32 1, 1
-	br i1 %1, label %ifTrue_0, label %ifFalse_0
+	br i1 %1, label %ifTrue_0, label %ifEnd_0
 	ifTrue_0:
 		store i32 0, i32* %x
-	ifFalse_0:
+		br label %ifEnd_0
+	ifEnd_0:
 		ret i32 0
 	}

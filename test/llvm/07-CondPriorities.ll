@@ -20,20 +20,17 @@ define void @println(i32 %x) #0 {
 declare i32 @printf(i8*, ...) #1;
 
 define i32 @main() {
-	%x = alloca i32
-	%y = alloca i32
-	%z = alloca i32
 	%a = alloca i32
 	br label %whileLoop_0
 	whileLoop_0:
-		%1 = icmp eq i32 %x, 1
-		%2 = icmp slt i32 %y, 2
-		%3 = icmp slt i32 3, %z
-		%4 = and i32 %2, %3
-		%5 = or i32 %1, %4
+		%1 = icmp eq i32 2, 1
+		%2 = icmp slt i32 11, 2
+		%3 = icmp slt i32 22, 3
+		%4 = and i1 %2, %3
+		%5 = or i1 %1, %4
 		br i1 %5, label %whileBody_0, label %whileEnd_0
 	whileBody_0:
-		store i32 %x, i32* %a
+		store i32 2, i32* %a
 		br label %whileLoop_0
 	whileEnd_0:
 		ret i32 0
