@@ -10,6 +10,11 @@ build: jflex
 	javac -d more -cp src/ src/Main.java
 	jar cfe dist/part3.jar Main -C more .
 
+test: build
+	java -jar dist/part3.jar test/_input/00-euclid.pmp > test/llvm/00-euclid.ll
+	llvm-as test/llvm/00-euclid.ll -o test/llvm/00-euclid.bc
+	lli test/llvm/00-euclid.bc
+
 testing: build
 	for testFile in test/_input/*.pmp ; do \
 		echo "\nTest file:" $$testFile ; \
