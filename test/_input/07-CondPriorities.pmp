@@ -1,0 +1,4 @@
+begin
+  while 2 = 1 or 11 < 2 and 22 < 3 do
+    a := 2
+end

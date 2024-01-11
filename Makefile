@@ -1,54 +1,34 @@
-JAVA = java
-JAVAC = javac
-JFLEX = jflex
-JAR = jar
-JAVADOC = javadoc
-JAR_NAME = part2.jar
-JAR_DIR = dist
-DOC_DIR = doc
-LIB_DIR = lib
-JAVADOC_DIR = doc/javadoc
-BUILD_DIR = more
-SRC_DIR = src
-TEST_DIR = test
-TEST_RESOURCES_DIR = test/resources/parser/input
-INPUT_FILE = src/resources/euclid.pmp
-OUTPUT_FILE = filename.tex
+default: build
 
-javadoc: $(SRC_DIR)/*.java
-	$(JAVADOC) -private $(SRC_DIR)/*.java -d $(JAVADOC_DIR)
+jflex:
+	jflex src/LexicalAnalyzer.flex
 
-jflex: $(SRC_DIR)/LexicalAnalyzer.flex
-	$(JFLEX) $(SRC_DIR)/LexicalAnalyzer.flex
+javadoc:
+	javadoc -private src/*.java -d doc/javadoc
 
-compile: jflex
-	$(JAVAC) -d $(BUILD_DIR) -cp $(BUILD_DIR) $(SRC_DIR)/*.java
+build: jflex
+	javac -d more -cp src/ src/Main.java
+	jar cfe dist/part3.jar Main -C more .
 
-parse_only: compile
-	$(JAVA) -cp $(BUILD_DIR) Main $(INPUT_FILE)
+test: build
+	java -jar dist/part3.jar test/_input/00-euclid.pmp > test/llvm/00-euclid.ll
+	llvm-as test/llvm/00-euclid.ll -o test/llvm/00-euclid.bc
+	lli test/llvm/00-euclid.bc
 
-parse_and_build_tree: compile
-	$(JAVA) -cp $(BUILD_DIR) Main -wt $(OUTPUT_FILE) $(INPUT_FILE)
-
-jar: compile
-	$(JAR) cfe $(JAR_DIR)/$(JAR_NAME) Main -C $(BUILD_DIR) .
-
-launch_parse_only: jar
-	$(JAVA) -jar $(JAR_DIR)/$(JAR_NAME) $(INPUT_FILE)
-
-launch_parse_and_build_tree: jar
-	$(JAVA) -jar $(JAR_DIR)/$(JAR_NAME) -wt $(OUTPUT_FILE) $(INPUT_FILE)
-
-testing: jar
-	for testFile in $(TEST_RESOURCES_DIR)/*.pmp ; do \
+testing: build
+	for testFile in test/_input/*.pmp ; do \
 		echo "\nTest file:" $$testFile ; \
-		$(JAVA) -jar $(JAR_DIR)/$(JAR_NAME) $$testFile ; \
+		echo "\tWrite LLVM code from $$(basename $$testFile .pmp).tex..."; \
+		java -jar dist/part3.jar -wt /tmp/$$(basename $$testFile .pmp).tex $$testFile > test/llvm/$$(basename $$testFile .pmp).ll ; \
+		echo "\tCompile LLVM code from $$(basename $$testFile .pmp).ll..."; \
+		llvm-as test/llvm/$$(basename $$testFile .pmp).ll -o test/llvm/$$(basename $$testFile .pmp).bc ; \
+		echo "\tRun LLVM code from $$(basename $$testFile .pmp).bc..."; \
+		lli test/llvm/$$(basename $$testFile .pmp).bc ; \
+		echo "Done"; \
 		echo "" ; \
 	done
 
-all: launch_parse_and_build_tree
-
-.PHONY: clean
+all: javadoc build testing
 
 clean:
-	rm -rf $(JAVADOC_DIR)/* $(JAR_DIR)/$(JAR_NAME) $(BUILD_DIR) *.txt *.tex
+	rm -rf more/* dist/part3.jar doc/javadoc/*

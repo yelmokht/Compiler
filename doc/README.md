@@ -1,1 +1,0 @@
-This folder contains the JAVADOC and the PDF report.

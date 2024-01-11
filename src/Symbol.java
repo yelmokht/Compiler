@@ -1,143 +1,201 @@
-import java.util.Objects;
-
 /**
- * Represents tokens for the scanner and symbols (terminal or variable) for the grammar.
+ * Symbol objects represent a terminal or non-terminal symbol in the grammar.
+ * 
+ * @author Not fully determined but assmed to be among Marie Van Den Bogaard, Léo Exibard, Gilles Geeraerts. Javadoc by Mathieu Sassolas.
  */
-public class Symbol {
-	public static final int UNDEFINED_POSITION = -1;
-	public static final Object NO_VALUE = null;
-	private LexicalUnit type;
+ 
+ public class Symbol{
+     /**
+      * Undefined line/column position of symbol.
+      */
+	private static final int UNDEFINED_POSITION = -1; // Changed to private because I didn't see why they were public
+    
+     /**
+      * No value attached to symbol, for terminals without value.
+      */
+	private static final Object NO_VALUE = null;      // and nothing bad happened, so I guess it works -- MS
+	
+    /**
+     * The LexicalUnit (terminal) attached to this token.
+     */
+	private final LexicalUnit type;
+    
+    /**
+     * The value attached to the token.
+     * 
+     * May be any Object. In fact, for terminals with value it is indeed the value attached to the terminal. It can also be used to store the {@link NonTerminal NonTerminal} variable when the symbol is non-terminal.
+     */
 	private final Object value;
-	private final int line, column;
+    
+    /**
+     * The position of the symbol in the parsed file.
+     */
+	private final int line,column;
 
-	public Symbol(LexicalUnit unit, int line, int column, Object value){
+    /**
+     * Creates a Symbol using the provided attributes.
+     * 
+     * @param unit the LexicalUnit (terminal) associated with the symbol.
+     * @param line the line where the symbol appears in the file.
+     * @param column the column where the symbol appears in the file.
+     * @param value the value of the symbol: value of a terminal symbol or {@link NonTerminal NonTerminal} associated with the symbol.
+     */
+	public Symbol(LexicalUnit unit,int line,int column,Object value){
 		this.type	= unit;
 		this.line	= line+1;
 		this.column	= column;
 		this.value	= value;
 	}
 	
-	public Symbol(LexicalUnit unit, int line, int column){
-		this(unit, line, column, NO_VALUE);
+    /**
+     * Creates a Symbol using the provided attributes and no value.
+     * 
+     * @param unit the LexicalUnit (terminal) associated with the symbol.
+     * @param line the line where the symbol appears in the file.
+     * @param column the column where the symbol appears in the file.
+     */
+	public Symbol(LexicalUnit unit,int line,int column){
+		this(unit,line,column,NO_VALUE);
 	}
 	
-	public Symbol(LexicalUnit unit, int line){
-		this(unit, line, UNDEFINED_POSITION, NO_VALUE);
+    /**
+     * Creates a Symbol using the provided attributes, without column nor value.
+     * 
+     * @param unit the LexicalUnit (terminal) associated with the symbol.
+     * @param line the line where the symbol appears in the file.
+     */
+	public Symbol(LexicalUnit unit,int line){
+		this(unit,line,UNDEFINED_POSITION,NO_VALUE);
 	}
 	
+    /**
+     * Creates a Symbol using the provided attributes, without position or value.
+     * 
+     * @param unit the LexicalUnit (terminal) associated with the symbol.
+     */
 	public Symbol(LexicalUnit unit){
-		this(unit, UNDEFINED_POSITION, UNDEFINED_POSITION, NO_VALUE);
+		this(unit,UNDEFINED_POSITION,UNDEFINED_POSITION,NO_VALUE);
+	}
+	
+    /**
+     * Creates a Symbol using the provided attributes, without position.
+     * 
+     * @param unit the LexicalUnit (terminal) associated with the symbol.
+     * @param value the value of the symbol: value of a terminal symbol or {@link NonTerminal NonTerminal} associated with the symbol.
+     */
+	public Symbol(LexicalUnit unit,Object value){
+		this(unit,UNDEFINED_POSITION,UNDEFINED_POSITION,value);
 	}
 
-	/**
-	 * Creates a symbol for the grammar (terminal with TERMINAL type or variable with VARIABLE type)
-	 */
-	public Symbol(LexicalUnit unit, Object value){
-		this(unit, UNDEFINED_POSITION, UNDEFINED_POSITION, value);
+    /**
+     * Returns whether the symbol represents a terminal.
+     * 
+     * A terminal symbol must have a non-null LexicalUnit type.
+     * 
+     * @return a boolean which is true iff the Symbol represents a terminal.
+     */
+	public boolean isTerminal(){
+		return this.type != null;
 	}
-
+	
+    /**
+     * Returns whether the symbol represents a non-terminal.
+     * 
+     * A non-terminal symbol has no type.
+     * 
+     * @return a boolean which is true iff the Symbol represents a non-terminal.
+     */
+	public boolean isNonTerminal(){
+		return this.type == null;
+	}
+	
+    /**
+     * Returns the type of the symbol.
+     * 
+     * The type of a non-terminal is null.
+     * 
+     * @return the value of attribute {@link type type}.
+     */
 	public LexicalUnit getType(){
 		return this.type;
 	}
 	
+    /**
+     * Returns the value of the symbol.
+     * 
+     * @return the value of attribute {@link value value}.
+     */
 	public Object getValue(){
 		return this.value;
 	}
 	
+    /**
+     * Returns the line where the symbol appeared.
+     * 
+     * @return the value of attribute {@link line line}.
+     */
 	public int getLine(){
 		return this.line;
 	}
 	
+    /**
+     * Returns the column where the symbol appeared.
+     * 
+     * @return the value of attribute {@link column column}.
+     */
 	public int getColumn(){
 		return this.column;
 	}
-
-	public void setType(LexicalUnit type) {
-		this.type = type;
-	}
-
-	public boolean isToken(){
-		return this.type != null;
-	}
-
-	public boolean isNull(){
-		return this.type == null;
-	}
-
-	/**
-	 * Checks if the symbol is a terminal symbol.
-	 * @return True if the symbol is a terminal, false otherwise.
-	 */
-	public boolean isTerminal(){
-		return this.type == LexicalUnit.TERMINAL;
-	}
-
-	/**
-	 * Checks if the symbol is a non-terminal symbol (it is variable then).
-	 * @return True if the symbol is a non-terminal, false otherwise.
-	 */
-	public boolean isVariable(){
-		return this.type == LexicalUnit.VARIABLE;
-	}
-
-
-	/**
-	 * Converts the current object to its LaTeX representation as a string.
-	 * <p></p>
-	 * If the object is a variable, it replaces special variable characters with their LaTeX equivalents.
-	 * If the object is a terminal, it checks for specific special characters and replaces them with their LaTeX equivalents.
-	 * @return The LaTeX representation of the object as a string.
-	 */
-	public String toTexString() {
-		if (this.isVariable()) {
-			// If it is a variable, replace special variable characters in variable with their LaTeX equivalents
-			return this.getValue().toString()
-					.replace(Format.START_VARIABLE, Format.START_VARIABLE_LATEX)
-					.replace(Format.FINISH_VARIABLE, Format.FINISH_VARIABLE_LATEX);
-		}
-
-		// If the object is not a variable so a terminal, get its value as a string
-		String value = this.getValue().toString();
-
-		// Replace special character terminal with their LaTeX equivalents
-		switch (value) {
-			case Format.EPSILON:
-				return Format.EPSILON_LATEX;
-			case Format.SMALLER:
-				return Format.SMALLER_LATEX;
-			default:
-				return value;
-		}
-
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		Symbol symbol = (Symbol) o;
-		return Objects.equals(type, symbol.type) && Objects.equals(value, symbol.value);
-	}
-
+	
+    /**
+     * Returns a hash code value for the object.
+     * 
+     * @return a hash code based on the type and value of the Symbol.
+     */
 	@Override
 	public int hashCode(){
-		final String value = this.value != null? this.value.toString() : "null";
-		final String type = this.type != null? this.type.toString()  : "null";
+		final String value	= this.value != null? this.value.toString() : "null";
+		final String type		= this.type  != null? this.type.toString()  : "null";
 		return new String(value+"_"+type).hashCode();
 	}
 	
+    /**
+     * Returns a string representation of the symbol.
+     * This method has been modified from the provided class to provide the value of the non-terminal symbols.
+     * 
+     * @return a string representation of the token's value and type.
+     */
 	@Override
 	public String toString(){
-		if (this.isToken()){
-			if (this.isVariable() || this.isTerminal()) {
-				return this.value.toString();
-			} else {
-				final String value = this.value != null ? this.value.toString() : "null";
-				final String type = this.type != null ? this.type.toString() : "null";
-				return "token: " + value + "\tlexical unit: " + type;
-			}
+        final String value	= this.value != null? this.value.toString() : "null";
+		if(this.isTerminal()){
+			final String type		= this.type  != null? this.type.toString()  : "null";
+			return "token: "+value+"\tlexical unit: "+type;
 		}
-		return "Non-terminal symbol";
+		return "Non-terminal symbol: "+value;
 	}
-
+    
+    /**
+     * Returns a LaTeX representation of the symbol.
+     * 
+     * @return a string containing LaTeX code of a representation of the token's value and type.
+     */
+	public String toTexString(){
+        String value = "";
+		if(this.isTerminal()){
+            if (this.type == LexicalUnit.VARNAME || this.type == LexicalUnit.NUMBER) {
+                value = this.value != null? ": "+this.value.toString() : "";
+            }
+			final String type = this.type  != null? this.type.toTexString()  : "null";
+			return type+value;
+		} else {
+            if (this.value != null && this.value instanceof NonTerminal) {
+                value	= ((NonTerminal) this.value).toTexString();
+            } else {
+                value="null";
+            }
+			return value;
+        }
+		//return "UNREACHABLE RETURN";
+	}
 }

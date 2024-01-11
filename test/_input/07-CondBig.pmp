@@ -1,0 +1,4 @@
+begin
+  while {{{10 < 1}} or {4 < 3}} do
+    a := 1
+end
