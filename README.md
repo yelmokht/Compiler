@@ -8,41 +8,5 @@ In this third and last part, we generated LLVM code that corresponds to the sema
 To compile the project into a .jar file, you can use the following command in your terminal:
 
 ```bash
-make jar
+make build
 ```
-
-# Usage
-You can run the project in two different ways:
-
-## Using Project Files:
-You can execute the Main class by running the following commands:
-
-```bash
-make parse_only
-```
-
-or 
-
-```bash
-make parse_and_build_tree
-```
-
-These methods allow you to directly run the project using its source files.
-
-## Using Compiled JAR:
-
-If you prefer, you can use the precompiled JAR file by executing:
-
-```bash
-make launch_parse_only
-```
-
-or
-
-```bash
-make launch_parse_and_build_tree
-```
-
-These commands use the part2.jar file generated during compilation. If you want to process a different input file
-or output the parsing tree to a different file, you can make the necessary changes in the Makefile
-(INPUT_FILE and OUTPUT_FILE).
