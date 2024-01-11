@@ -10,3 +10,10 @@ To compile the project into a .jar file, you can use the following command in yo
 ```bash
 make build
 ```
+
+# Usage
+To test the project, you can upload test files in test/_input/ folder. You can then use the following command in your terminal:
+
+```bash
+make testing
+```
